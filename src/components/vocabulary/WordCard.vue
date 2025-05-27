@@ -1,5 +1,58 @@
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const props = defineProps<{
+  word: {
+    id: string
+    kanji: string
+    kana: string
+    meaning: string
+    example: string
+    exampleMeaning?: string
+    level: string
+    tags?: string[]
+  }
+}>()
+
+const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
+
+const isFlipped = ref(false)
+const isFavorite = ref(false)
+
+const toggleFlip = () => {
+  isFlipped.value = !isFlipped.value
+}
+
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value
+  emit('favorite', props.word.id, isFavorite.value)
+}
+
+const handleReviewLater = (event: Event) => {
+  event.stopPropagation()
+  emit('reviewLater', props.word.id)
+}
+
+const handleMarkMastered = (event: Event) => {
+  event.stopPropagation()
+  emit('markMastered', props.word.id)
+}
+
+const levelClass = computed(() => {
+  switch (props.word.level) {
+    case 'N5': return 'level-n5'
+    case 'N4': return 'level-n4'
+    case 'N3': return 'level-n3'
+    case 'N2': return 'level-n2'
+    case 'N1': return 'level-n1'
+    default: return ''
+  }
+})
+</script>
+
 <template>
-  <div class="word-card">
+  <div :class="['word-card', { 'is-flipped': isFlipped }]" @click="toggleFlip">
     <div class="card-inner">
       <div class="card-front">
         <div :class="['level-badge', levelClass]">{{ word.level }}</div>
@@ -25,34 +78,33 @@
         </div>
         
         <div class="card-content">
-          <div class="examples" v-if="hasExample">
-            <div class="example" v-if="currentExample.text">
-              <p class="jp-text">{{ currentExample.text }}</p>
-              <p v-if="currentExample.meaning" class="example-meaning">{{ currentExample.meaning }}</p>
+          <div class="examples">
+            <div class="example" v-if="word.example">
+              <p class="jp-text">{{ word.example }}</p>
+              <p v-if="word.exampleMeaning" class="example-meaning">{{ word.exampleMeaning }}</p>
+            </div>
+            <div class="example" v-if="word.example2">
+              <p class="jp-text">{{ word.example2 }}</p>
+              <p v-if="word.example2Meaning" class="example-meaning">{{ word.example2Meaning }}</p>
+            </div>
+            <div class="example" v-if="word.example3">
+              <p class="jp-text">{{ word.example3 }}</p>
+              <p v-if="word.example3Meaning" class="example-meaning">{{ word.example3Meaning }}</p>
             </div>
           </div>
           
-          <div class="example-tabs">
-            <button 
-              v-if="word.example"
-              :class="['tab-btn', { active: currentExampleIndex === 0 }]"
-              @click.stop="setExample(0)"
-            >
-              例句1
+          <div class="tags" v-if="word.tags && word.tags.length">
+            <span v-for="(tag, index) in word.tags" :key="index" class="tag">{{ tag }}</span>
+          </div>
+          
+          <div class="card-actions">
+            <button class="action-btn review-later" @click="handleReviewLater">
+              <i class="ri-time-line"></i>
+              稍后复习
             </button>
-            <button 
-              v-if="word.example2"
-              :class="['tab-btn', { active: currentExampleIndex === 1 }]"
-              @click.stop="setExample(1)"
-            >
-              例句2
-            </button>
-            <button 
-              v-if="word.example3"
-              :class="['tab-btn', { active: currentExampleIndex === 2 }]"
-              @click.stop="setExample(2)"
-            >
-              例句3
+            <button class="action-btn mark-mastered" @click="handleMarkMastered">
+              <i class="ri-check-double-line"></i>
+              已掌握
             </button>
           </div>
         </div>
@@ -64,7 +116,7 @@
 <style lang="scss" scoped>
 .word-card {
   perspective: 1000px;
-  height: 280px;
+  height: 250px;
   cursor: pointer;
   user-select: none;
 }
@@ -91,10 +143,14 @@
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
+}
+
+.card-front {
   background-color: white;
 }
 
 .card-back {
+  background-color: white;
   transform: rotateY(180deg);
 }
 
@@ -108,11 +164,25 @@
   font-weight: 600;
   color: white;
   
-  &.level-n5 { background-color: #4CAF50; }
-  &.level-n4 { background-color: #2196F3; }
-  &.level-n3 { background-color: #FF9800; }
-  &.level-n2 { background-color: #F44336; }
-  &.level-n1 { background-color: #9C27B0; }
+  &.level-n5 {
+    background-color: #4CAF50;
+  }
+  
+  &.level-n4 {
+    background-color: #2196F3;
+  }
+  
+  &.level-n3 {
+    background-color: #FF9800;
+  }
+  
+  &.level-n2 {
+    background-color: #F44336;
+  }
+  
+  &.level-n1 {
+    background-color: #9C27B0;
+  }
 }
 
 .favorite-btn {
@@ -146,170 +216,121 @@
 .card-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
+  text-align: center;
   margin-top: var(--spacing-lg);
-  padding: 0 var(--spacing-sm);
 }
 
 .kanji {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: var(--spacing-xs);
-  text-align: center;
 }
 
 .kana {
   font-size: 1.2rem;
   color: var(--text-light);
   margin-bottom: var(--spacing-sm);
-  text-align: center;
 }
 
 .meaning {
   font-size: 1.1rem;
   color: var(--text-color);
   margin-bottom: var(--spacing-md);
-  text-align: center;
 }
 
 .card-hint {
   font-size: 0.9rem;
   color: var(--text-muted);
   margin-top: var(--spacing-md);
-  text-align: center;
 }
 
 .examples {
-  flex: 1;
   margin-bottom: var(--spacing-md);
 }
 
 .example {
   margin-bottom: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background-color: var(--background-color);
-  border-radius: var(--border-radius);
-
-  .jp-text {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 4px;
-    word-break: break-all;
-  }
-
-  .example-meaning {
-    font-size: 0.9rem;
-    color: var(--text-light);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 }
 
-.example-tabs {
-  display: flex;
-  gap: var(--spacing-xs);
-  margin-top: auto;
-  padding-top: var(--spacing-md);
+.jp-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 4px;
 }
 
-.tab-btn {
-  flex: 1;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: none;
-  color: var(--text-color);
+.example-meaning {
   font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.tag {
+  background-color: #f0f0f0;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.card-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: auto;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
-
-  &:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+  
+  i {
+    margin-right: 4px;
+    font-size: 1rem;
   }
-
-  &.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+  
+  &.review-later {
+    background-color: #f8f9fa;
+    color: var(--text-color);
+    
+    &:hover {
+      background-color: #e9ecef;
+    }
+  }
+  
+  &.mark-mastered {
+    background-color: var(--success-color);
     color: white;
+    
+    &:hover {
+      background-color: darken(#2ecc71, 10%);
+    }
   }
 }
 </style>
-
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const props = defineProps<{
-  word: {
-    id: string
-    kanji: string
-    kana: string
-    meaning: string
-    example: string
-    exampleMeaning?: string
-    example2?: string
-    example2Meaning?: string
-    example3?: string
-    example3Meaning?: string
-    level: string
-    tags?: string[]
-  }
-}>()
-
-const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
-
-const isFlipped = ref(false)
-const isFavorite = ref(false)
-const currentExampleIndex = ref(0)
-
-const toggleFlip = () => {
-  isFlipped.value = !isFlipped.value
-}
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value
-  emit('favorite', props.word.id, isFavorite.value)
-}
-
-const levelClass = computed(() => {
-  switch (props.word.level) {
-    case 'N5': return 'level-n5'
-    case 'N4': return 'level-n4'
-    case 'N3': return 'level-n3'
-    case 'N2': return 'level-n2'
-    case 'N1': return 'level-n1'
-    default: return ''
-  }
-})
-
-const currentExample = computed(() => {
-  switch (currentExampleIndex.value) {
-    case 0:
-      return {
-        text: props.word.example,
-        meaning: props.word.exampleMeaning
-      }
-    case 1:
-      return {
-        text: props.word.example2,
-        meaning: props.word.example2Meaning
-      }
-    case 2:
-      return {
-        text: props.word.example3,
-        meaning: props.word.example3Meaning
-      }
-    default:
-      return {
-        text: '',
-        meaning: ''
-      }
-  }
-})
-
-const hasExample = computed(() => {
-  return props.word.example || props.word.example2 || props.word.example3
-})
-
-const setExample = (index: number) => {
-  currentExampleIndex.value = index
-}
-</script>
+```
