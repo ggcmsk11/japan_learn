@@ -51,6 +51,24 @@
         </div>
 
         <div class="form-group">
+          <label>验证码</label>
+          <div class="captcha-input">
+            <input 
+              type="text" 
+              v-model="registerForm.captcha" 
+              required 
+              placeholder="请输入验证码"
+            >
+            <img 
+              :src="captchaUrl" 
+              alt="验证码" 
+              class="captcha-image"
+              @click="refreshCaptcha"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
           <label class="agreement">
             <input type="checkbox" v-model="registerForm.agreement" required>
             <span>我已阅读并同意<a href="#" @click.prevent="showTerms">服务条款</a>和<a href="#" @click.prevent="showPrivacy">隐私政策</a></span>
@@ -67,6 +85,27 @@
         </div>
       </form>
     </div>
+
+    <!-- Registration Success Dialog -->
+    <el-dialog
+      v-model="showSuccessDialog"
+      title="注册成功"
+      width="360px"
+      center
+      :show-close="false"
+      class="success-dialog"
+    >
+      <div class="success-content">
+        <i class="ri-check-line success-icon"></i>
+        <p>恭喜您注册成功！</p>
+        <p class="sub-text">即将跳转到登录页面...</p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="goToLogin">立即登录</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- Area Code Select Dialog -->
     <el-dialog
@@ -107,12 +146,15 @@ const router = useRouter()
 const showPassword = ref(false)
 const isSubmitting = ref(false)
 const showAreaCodeSelect = ref(false)
+const showSuccessDialog = ref(false)
 const areaCode = ref('86')
+const captchaUrl = ref('https://www.dlmy.tech/chunshua-api/captcha')
 
 const registerForm = ref({
   phone: '',
   password: '',
   confirmPassword: '',
+  captcha: '',
   agreement: false
 })
 
@@ -128,6 +170,15 @@ const areaCodes = [
 const selectAreaCode = (code: string) => {
   areaCode.value = code
   showAreaCodeSelect.value = false
+}
+
+const refreshCaptcha = () => {
+  captchaUrl.value = `https://www.dlmy.tech/chunshua-api/captcha?t=${Date.now()}`
+}
+
+const goToLogin = () => {
+  showSuccessDialog.value = false
+  router.push('/auth/login')
 }
 
 const handleRegister = async () => {
@@ -157,6 +208,7 @@ const handleRegister = async () => {
         user_account: "11",
         password: encryptedPassword,
         phone_number: phoneNumber,
+        captcha: registerForm.value.captcha,
         user_name: "",
         user_source: "官方网站",
         registerType: 2
@@ -167,12 +219,16 @@ const handleRegister = async () => {
 
     if (data.code !== 200) {
       throw new Error(data.msg || '注册失败')
+      refreshCaptcha()
     }
 
-    ElMessage.success('注册成功')
-    router.push('/auth/login')
+    showSuccessDialog.value = true
+    setTimeout(() => {
+      goToLogin()
+    }, 2000)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '注册失败，请稍后重试')
+    refreshCaptcha()
   } finally {
     isSubmitting.value = false
   }
@@ -185,6 +241,9 @@ const showTerms = () => {
 const showPrivacy = () => {
   router.push('/privacy')
 }
+
+// Initialize captcha on mount
+refreshCaptcha()
 </script>
 
 <style lang="scss" scoped>
@@ -260,6 +319,30 @@ const showPrivacy = () => {
       outline: none;
       border-color: var(--primary-color);
     }
+  }
+}
+
+.captcha-input {
+  display: flex;
+  gap: var(--spacing-xs);
+
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
+
+  .captcha-image {
+    height: 40px;
+    border-radius: 4px;
+    cursor: pointer;
   }
 }
 
@@ -381,6 +464,34 @@ const showPrivacy = () => {
 
     .code {
       color: var(--text-light);
+    }
+  }
+}
+
+.success-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .success-content {
+    text-align: center;
+    padding: var(--spacing-lg) 0;
+
+    .success-icon {
+      font-size: 3rem;
+      color: var(--success-color);
+      margin-bottom: var(--spacing-md);
+    }
+
+    p {
+      margin-bottom: var(--spacing-xs);
+      font-size: 1.1rem;
+
+      &.sub-text {
+        color: var(--text-light);
+        font-size: 0.9rem;
+      }
     }
   }
 }
