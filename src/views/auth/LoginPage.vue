@@ -177,7 +177,7 @@ const handleLogin = async () => {
       body: JSON.stringify({
         user_account: "11",
         password: encryptedPassword,
-        phone_number: `${areaCode.value}${loginForm.value.phone}`,
+        phone_number: areaCode.value + loginForm.value.phone,
         device_info: "1",
         ip_address: "1",
         loginType: 0
