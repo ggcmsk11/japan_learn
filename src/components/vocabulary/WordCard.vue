@@ -145,21 +145,6 @@ const setExample = (index: number) => {
               </button>
             </div>
           </div>
-          
-          <div class="tags" v-if="word.tags && word.tags.length">
-            <span v-for="(tag, index) in word.tags" :key="index" class="tag">{{ tag }}</span>
-          </div>
-          
-          <div class="card-actions">
-            <button class="action-btn review-later" @click="handleReviewLater">
-              <i class="ri-time-line"></i>
-              稍后复习
-            </button>
-            <button class="action-btn mark-mastered" @click="handleMarkMastered">
-              <i class="ri-check-double-line"></i>
-              已掌握
-            </button>
-          </div>
         </div>
       </div>
     </div>
