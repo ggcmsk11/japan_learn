@@ -145,10 +145,6 @@ const setExample = (index: number) => {
               </button>
             </div>
           </div>
-          
-          <div class="tags" v-if="word.tags && word.tags.length">
-            <span v-for="(tag, index) in word.tags" :key="index" class="tag">{{ tag }}</span>
-          </div>
         
         </div>
       </div>
