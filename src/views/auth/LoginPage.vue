@@ -158,16 +158,18 @@ const selectAreaCode = (code: string) => {
   showAreaCodeSelect.value = false
 }
 
+// In LoginPage.vue login function
 const handleLogin = async () => {
   try {
     isSubmitting.value = true
     
-    // 密码加密
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
     
     // 打印加密后的密码
     console.log('Encrypted Password:', encryptedPassword)
+    
+    const phoneNumber = areaCode.value + loginForm.value.phone
     
     const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
       method: 'POST',
@@ -177,7 +179,7 @@ const handleLogin = async () => {
       body: JSON.stringify({
         user_account: "11",
         password: encryptedPassword,
-        phone_number: areaCode.value + loginForm.value.phone,
+        phone_number: phoneNumber,
         device_info: "1",
         ip_address: "1",
         loginType: 2
@@ -190,8 +192,8 @@ const handleLogin = async () => {
       throw new Error(data.msg || '登录失败')
     }
     
-    // 存储用户信息到 store
-    authStore.login(data.data.token, data.data)
+    // 存储用户信息到 store，并传入手机号
+    authStore.login(data.data.token, data.data, phoneNumber)
     
     // 跳转到首页或之前的页面
     const redirect = route.query.redirect as string
@@ -204,6 +206,7 @@ const handleLogin = async () => {
     isSubmitting.value = false
   }
 }
+
 </script>
 
 <style lang="scss" scoped>
