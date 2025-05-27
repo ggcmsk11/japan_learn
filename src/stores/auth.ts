@@ -14,12 +14,14 @@ interface UserInfo {
   japaneseN3: number
   japaneseN4: number
   japaneseN5: number
+  phoneNumber?: string // Add phone number field
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = ref(false)
   const token = ref('')
   const userInfo = ref<UserInfo | null>(null)
+  const phoneNumber = ref('') // Add phone number ref
   const permissions = ref({
     N5: true,
     N4: true,
@@ -28,10 +30,14 @@ export const useAuthStore = defineStore('auth', () => {
     N1: false
   })
 
-  const login = (tokenValue: string, user: UserInfo) => {
+  const login = (tokenValue: string, user: UserInfo, phone?: string) => {
     isLoggedIn.value = true
     token.value = tokenValue
     userInfo.value = user
+    if (phone) {
+      phoneNumber.value = phone
+      userInfo.value.phoneNumber = phone
+    }
     
     // Update permissions based on user's Japanese level access
     permissions.value = {
@@ -58,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     token,
     userInfo,
+    phoneNumber,
     permissions,
     login,
     logout,
