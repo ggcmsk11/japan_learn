@@ -4,13 +4,19 @@
       <h2>登录</h2>
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">
-          <label>邮箱</label>
-          <input 
-            type="email" 
-            v-model="loginForm.email" 
-            required 
-            placeholder="请输入邮箱"
-          >
+          <label>手机号</label>
+          <div class="phone-input">
+            <div class="area-code" @click="showAreaCodeSelect = true">
+              <span>+{{ areaCode }}</span>
+              <i class="ri-arrow-down-s-line"></i>
+            </div>
+            <input 
+              type="tel" 
+              v-model="loginForm.phone"
+              required 
+              placeholder="请输入手机号"
+            >
+          </div>
         </div>
         
         <div class="form-group">
@@ -18,8 +24,8 @@
           <div class="password-input">
             <input 
               :type="showPassword ? 'text' : 'password'" 
-              v-model="loginForm.password" 
-              required 
+              v-model="loginForm.password"
+              required
               placeholder="请输入密码"
             >
             <button 
@@ -59,6 +65,33 @@
         </div>
       </form>
     </div>
+
+    <!-- Area Code Select Dialog -->
+    <el-dialog
+      v-model="showAreaCodeSelect"
+      title="选择区号"
+      width="360px"
+      center
+      :show-close="false"
+      class="area-code-dialog"
+    >
+      <div class="area-code-list">
+        <div 
+          v-for="code in areaCodes" 
+          :key="code.code"
+          class="area-code-item"
+          @click="selectAreaCode(code.code)"
+        >
+          <span class="country">{{ code.country }}</span>
+          <span class="code">+{{ code.code }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showAreaCodeSelect = false">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- Download dialog -->
     <el-dialog
@@ -100,37 +133,69 @@ const authStore = useAuthStore()
 
 const showPassword = ref(false)
 const showDownloadDialog = ref(false)
+const showAreaCodeSelect = ref(false)
 const isSubmitting = ref(false)
+const areaCode = ref('86')
 
 const loginForm = ref({
-  email: '',
+  phone: '',
   password: '',
   remember: false
 })
+
+const areaCodes = [
+  { country: '中国', code: '86' },
+  { country: '中国香港', code: '852' },
+  { country: '中国澳门', code: '853' },
+  { country: '中国台湾', code: '886' },
+  { country: '日本', code: '81' },
+  { country: '韩国', code: '82' }
+]
+
+const selectAreaCode = (code: string) => {
+  areaCode.value = code
+  showAreaCodeSelect.value = false
+}
 
 const handleLogin = async () => {
   try {
     isSubmitting.value = true
     
-    // Simulate login API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_account: "11",
+        password: loginForm.value.password,
+        phone_number: areaCode.value + loginForm.value.phone,
+        device_info: "1",
+        ip_address: "1",
+        loginType: 0
+      })
+    })
     
-    // Login success
+    const data = await response.json()
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || '登录失败')
+    }
+    
+    // 存储用户信息
+    localStorage.setItem('token', data.data.token)
+    localStorage.setItem('userId', data.data.userId)
+    
+    // 更新用户信息和权限
     authStore.login()
     
-    ElMessage({
-      message: '登录成功',
-      type: 'success'
-    })
-
-    // Redirect to previous page or home
+    // 跳转到首页或之前的页面
     const redirect = route.query.redirect as string
     router.push(redirect || '/profile')
+    
+    ElMessage.success('登录成功')
   } catch (error) {
-    ElMessage({
-      message: error instanceof Error ? error.message : '登录失败，请稍后重试',
-      type: 'error'
-    })
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
   } finally {
     isSubmitting.value = false
   }
@@ -173,24 +238,61 @@ const handleLogin = async () => {
       color: var(--text-color);
       font-weight: 500;
     }
+  }
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 1rem;
+.phone-input {
+  display: flex;
+  gap: var(--spacing-xs);
 
-      &:focus {
-        outline: none;
-        border-color: var(--primary-color);
-      }
+  .area-code {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+
+    &:hover {
+      border-color: var(--primary-color);
+    }
+
+    span {
+      font-size: 0.95rem;
+    }
+  }
+
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
   }
 }
 
 .password-input {
   position: relative;
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
 
   .toggle-password {
     position: absolute;
@@ -249,8 +351,13 @@ const handleLogin = async () => {
   cursor: pointer;
   transition: background-color var(--transition-fast);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--primary-dark);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 }
 
@@ -298,6 +405,38 @@ const handleLogin = async () => {
 
   i {
     font-size: 1.2rem;
+  }
+}
+
+.area-code-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .area-code-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .area-code-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background-color: var(--background-color);
+    }
+
+    .country {
+      font-weight: 500;
+    }
+
+    .code {
+      color: var(--text-light);
+    }
   }
 }
 
