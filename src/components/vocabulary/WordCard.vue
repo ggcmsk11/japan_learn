@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
@@ -10,6 +9,10 @@ const props = defineProps<{
     meaning: string
     example: string
     exampleMeaning?: string
+    example2?: string
+    example2Meaning?: string
+    example3?: string
+    example3Meaning?: string
     level: string
     tags?: string[]
   }
@@ -19,6 +22,7 @@ const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
 
 const isFlipped = ref(false)
 const isFavorite = ref(false)
+const currentExampleIndex = ref(0)
 
 const toggleFlip = () => {
   isFlipped.value = !isFlipped.value
@@ -49,6 +53,39 @@ const levelClass = computed(() => {
     default: return ''
   }
 })
+
+const currentExample = computed(() => {
+  switch (currentExampleIndex.value) {
+    case 0:
+      return {
+        text: props.word.example,
+        meaning: props.word.exampleMeaning
+      }
+    case 1:
+      return {
+        text: props.word.example2,
+        meaning: props.word.example2Meaning
+      }
+    case 2:
+      return {
+        text: props.word.example3,
+        meaning: props.word.example3Meaning
+      }
+    default:
+      return {
+        text: '',
+        meaning: ''
+      }
+  }
+})
+
+const hasExample = computed(() => {
+  return props.word.example || props.word.example2 || props.word.example3
+})
+
+const setExample = (index: number) => {
+  currentExampleIndex.value = index
+}
 </script>
 
 <template>
@@ -78,18 +115,34 @@ const levelClass = computed(() => {
         </div>
         
         <div class="card-content">
-          <div class="examples">
-            <div class="example" v-if="word.example">
-              <p class="jp-text">{{ word.example }}</p>
-              <p v-if="word.exampleMeaning" class="example-meaning">{{ word.exampleMeaning }}</p>
+          <div class="examples" v-if="hasExample">
+            <div class="example" v-if="currentExample.text">
+              <p class="jp-text">{{ currentExample.text }}</p>
+              <p v-if="currentExample.meaning" class="example-meaning">{{ currentExample.meaning }}</p>
             </div>
-            <div class="example" v-if="word.example2">
-              <p class="jp-text">{{ word.example2 }}</p>
-              <p v-if="word.example2Meaning" class="example-meaning">{{ word.example2Meaning }}</p>
-            </div>
-            <div class="example" v-if="word.example3">
-              <p class="jp-text">{{ word.example3 }}</p>
-              <p v-if="word.example3Meaning" class="example-meaning">{{ word.example3Meaning }}</p>
+            
+            <div class="example-tabs">
+              <button 
+                v-if="word.example"
+                :class="['tab-btn', { active: currentExampleIndex === 0 }]"
+                @click.stop="setExample(0)"
+              >
+                例句1
+              </button>
+              <button 
+                v-if="word.example2"
+                :class="['tab-btn', { active: currentExampleIndex === 1 }]"
+                @click.stop="setExample(1)"
+              >
+                例句2
+              </button>
+              <button 
+                v-if="word.example3"
+                :class="['tab-btn', { active: currentExampleIndex === 2 }]"
+                @click.stop="setExample(2)"
+              >
+                例句3
+              </button>
             </div>
           </div>
           
@@ -116,7 +169,7 @@ const levelClass = computed(() => {
 <style lang="scss" scoped>
 .word-card {
   perspective: 1000px;
-  height: 250px;
+  height: 280px;
   cursor: pointer;
   user-select: none;
 }
@@ -143,15 +196,12 @@ const levelClass = computed(() => {
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
-}
-
-.card-front {
   background-color: white;
 }
 
 .card-back {
-  background-color: white;
   transform: rotateY(180deg);
+  overflow-y: auto;
 }
 
 .level-badge {
@@ -164,25 +214,11 @@ const levelClass = computed(() => {
   font-weight: 600;
   color: white;
   
-  &.level-n5 {
-    background-color: #4CAF50;
-  }
-  
-  &.level-n4 {
-    background-color: #2196F3;
-  }
-  
-  &.level-n3 {
-    background-color: #FF9800;
-  }
-  
-  &.level-n2 {
-    background-color: #F44336;
-  }
-  
-  &.level-n1 {
-    background-color: #9C27B0;
-  }
+  &.level-n5 { background-color: #4CAF50; }
+  &.level-n4 { background-color: #2196F3; }
+  &.level-n3 { background-color: #FF9800; }
+  &.level-n2 { background-color: #F44336; }
+  &.level-n1 { background-color: #9C27B0; }
 }
 
 .favorite-btn {
@@ -216,68 +252,95 @@ const levelClass = computed(() => {
 .card-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   flex: 1;
-  text-align: center;
   margin-top: var(--spacing-lg);
+  padding: 0 var(--spacing-sm);
 }
 
 .kanji {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: var(--spacing-xs);
+  text-align: center;
 }
 
 .kana {
   font-size: 1.2rem;
   color: var(--text-light);
   margin-bottom: var(--spacing-sm);
+  text-align: center;
 }
 
 .meaning {
   font-size: 1.1rem;
   color: var(--text-color);
   margin-bottom: var(--spacing-md);
+  text-align: center;
 }
 
 .card-hint {
   font-size: 0.9rem;
   color: var(--text-muted);
   margin-top: var(--spacing-md);
+  text-align: center;
 }
 
 .examples {
   margin-bottom: var(--spacing-md);
+  text-align: left;
 }
 
 .example {
   margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--border-color);
-  
-  &:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
+  padding: var(--spacing-sm);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+
+  .jp-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+
+  .example-meaning {
+    font-size: 0.9rem;
+    color: var(--text-light);
   }
 }
 
-.jp-text {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 4px;
+.example-tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
 }
 
-.example-meaning {
+.tab-btn {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: none;
+  color: var(--text-color);
   font-size: 0.9rem;
-  color: var(--text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  &.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+  }
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 4px;
   margin-bottom: var(--spacing-sm);
 }
@@ -333,4 +396,3 @@ const levelClass = computed(() => {
   }
 }
 </style>
-```
