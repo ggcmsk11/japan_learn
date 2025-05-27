@@ -1,6 +1,6 @@
 <template>
   <div class="word-card">
-    <div :class="['card-inner', { 'is-flipped': isFlipped }]">
+    <div class="card-inner">
       <div class="card-front">
         <div :class="['level-badge', levelClass]">{{ word.level }}</div>
         <div class="favorite-btn" @click.stop="toggleFavorite">
@@ -12,7 +12,7 @@
           <p class="kana">{{ word.kana }}</p>
           <p class="meaning">{{ word.meaning }}</p>
           
-          <div class="card-action" @click.stop="isFlipped = true">
+          <div class="card-action">
             <p class="card-hint">点击查看例句</p>
           </div>
         </div>
@@ -177,7 +177,6 @@
   color: var(--text-muted);
   margin-top: var(--spacing-md);
   text-align: center;
-  cursor: pointer;
 }
 
 .examples {
@@ -260,6 +259,10 @@ const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
 const isFlipped = ref(false)
 const isFavorite = ref(false)
 const currentExampleIndex = ref(0)
+
+const toggleFlip = () => {
+  isFlipped.value = !isFlipped.value
+}
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
