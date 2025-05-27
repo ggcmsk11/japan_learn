@@ -126,6 +126,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../../stores/auth'
+import md5 from 'md5'
 
 const router = useRouter()
 const route = useRoute()
@@ -161,6 +162,10 @@ const handleLogin = async () => {
   try {
     isSubmitting.value = true
     
+    // 密码加密
+    const pwKey = "chunshualiguan"
+    const encryptedPassword = md5(loginForm.value.password + pwKey)
+    
     const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
       method: 'POST',
       headers: {
@@ -168,11 +173,11 @@ const handleLogin = async () => {
       },
       body: JSON.stringify({
         user_account: "11",
-        password: loginForm.value.password,
-        phone_number: 86 + loginForm.value.phone,
+        password: encryptedPassword,
+        phone_number: areaCode.value + loginForm.value.phone,
         device_info: "1",
         ip_address: "1",
-        loginType: 2
+        loginType: 0
       })
     })
     
