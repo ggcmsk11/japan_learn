@@ -3,9 +3,6 @@
     <div class="container">
       <div class="profile-header">
         <div class="profile-info">
-          <div class="profile-avatar">
-            <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600" alt="用户头像">
-          </div>
           <div class="profile-details">
             <h1>{{ authStore.userInfo?.userName }}</h1>
             <p class="user-role">{{ userRole }}</p>
@@ -19,7 +16,7 @@
 
       <div class="profile-content">
         <div class="info-section">
-          <h2>基本信息</h2>
+          <h2><i class="ri-user-3-line"></i> 基本信息</h2>
           <div class="info-grid">
             <div class="info-item">
               <label>用户账号</label>
@@ -43,7 +40,7 @@
         </div>
 
         <div class="info-section">
-          <h2>会员信息</h2>
+          <h2><i class="ri-vip-crown-2-line"></i> 会员信息</h2>
           <div class="info-grid">
             <div class="info-item">
               <label>会员状态</label>
@@ -55,7 +52,7 @@
         </div>
 
         <div class="info-section">
-          <h2>JLPT等级权限</h2>
+          <h2><i class="ri-award-line"></i> JLPT等级权限</h2>
           <div class="jlpt-grid">
             <div 
               v-for="level in ['N1', 'N2', 'N3', 'N4', 'N5']" 
@@ -178,5 +175,225 @@ const downloadApp = () => {
 </script>
 
 <style lang="scss" scoped>
-// Keep existing styles unchanged
+.profile-page {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-color);
+  min-height: calc(100vh - 60px);
+}
+
+.profile-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.profile-info {
+  .profile-details {
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+    
+    .user-role {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.btn-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.info-section {
+  background-color: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+  
+  h2 {
+    font-size: 1.3rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    
+    i {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.info-item {
+  label {
+    display: block;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  span {
+    font-size: 1.1rem;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  
+  &.active {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--success-color);
+  }
+  
+  &.inactive {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--error-color);
+  }
+}
+
+.jlpt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.jlpt-item {
+  background-color: var(--background-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--transition-fast);
+  
+  &.not-activated {
+    cursor: pointer;
+    opacity: 0.7;
+    
+    &:hover {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+  }
+  
+  .level-badge {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  .access-status {
+    font-size: 0.9rem;
+    
+    &.has-access {
+      color: var(--success-color);
+    }
+    
+    &.no-access {
+      color: var(--text-light);
+    }
+  }
+}
+
+.purchase-dialog,
+.download-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .qr-container {
+    text-align: center;
+    padding: var(--spacing-md) 0;
+
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    p {
+      color: var(--text-color);
+      margin-bottom: var(--spacing-xs);
+
+      &.tip {
+        color: var(--text-light);
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .download-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+  }
+
+  .download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: opacity var(--transition-fast);
+
+    &:hover {
+      opacity: 0.9;
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+
+    &.android {
+      background-color: #3DDC84;
+    }
+
+    &.ios {
+      background-color: #000000;
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
 </style>
