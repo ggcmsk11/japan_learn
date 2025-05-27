@@ -1,95 +1,5 @@
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const props = defineProps<{
-  word: {
-    id: string
-    kanji: string
-    kana: string
-    meaning: string
-    example: string
-    exampleMeaning?: string
-    example2?: string
-    example2Meaning?: string
-    example3?: string
-    example3Meaning?: string
-    level: string
-    tags?: string[]
-  }
-}>()
-
-const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
-
-const isFlipped = ref(false)
-const isFavorite = ref(false)
-const currentExampleIndex = ref(0)
-
-const toggleFlip = () => {
-  isFlipped.value = !isFlipped.value
-}
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value
-  emit('favorite', props.word.id, isFavorite.value)
-}
-
-const handleReviewLater = (event: Event) => {
-  event.stopPropagation()
-  emit('reviewLater', props.word.id)
-}
-
-const handleMarkMastered = (event: Event) => {
-  event.stopPropagation()
-  emit('markMastered', props.word.id)
-}
-
-const levelClass = computed(() => {
-  switch (props.word.level) {
-    case 'N5': return 'level-n5'
-    case 'N4': return 'level-n4'
-    case 'N3': return 'level-n3'
-    case 'N2': return 'level-n2'
-    case 'N1': return 'level-n1'
-    default: return ''
-  }
-})
-
-const currentExample = computed(() => {
-  switch (currentExampleIndex.value) {
-    case 0:
-      return {
-        text: props.word.example,
-        meaning: props.word.exampleMeaning
-      }
-    case 1:
-      return {
-        text: props.word.example2,
-        meaning: props.word.example2Meaning
-      }
-    case 2:
-      return {
-        text: props.word.example3,
-        meaning: props.word.example3Meaning
-      }
-    default:
-      return {
-        text: '',
-        meaning: ''
-      }
-  }
-})
-
-const hasExample = computed(() => {
-  return props.word.example || props.word.example2 || props.word.example3
-})
-
-const setExample = (index: number) => {
-  currentExampleIndex.value = index
-}
-</script>
-
 <template>
-  <div :class="['word-card', { 'is-flipped': isFlipped }]" @click="toggleFlip">
+  <div class="word-card">
     <div class="card-inner">
       <div class="card-front">
         <div :class="['level-badge', levelClass]">{{ word.level }}</div>
@@ -120,32 +30,31 @@ const setExample = (index: number) => {
               <p class="jp-text">{{ currentExample.text }}</p>
               <p v-if="currentExample.meaning" class="example-meaning">{{ currentExample.meaning }}</p>
             </div>
-            
-            <div class="example-tabs">
-              <button 
-                v-if="word.example"
-                :class="['tab-btn', { active: currentExampleIndex === 0 }]"
-                @click.stop="setExample(0)"
-              >
-                例句1
-              </button>
-              <button 
-                v-if="word.example2"
-                :class="['tab-btn', { active: currentExampleIndex === 1 }]"
-                @click.stop="setExample(1)"
-              >
-                例句2
-              </button>
-              <button 
-                v-if="word.example3"
-                :class="['tab-btn', { active: currentExampleIndex === 2 }]"
-                @click.stop="setExample(2)"
-              >
-                例句3
-              </button>
-            </div>
           </div>
-        
+          
+          <div class="example-tabs">
+            <button 
+              v-if="word.example"
+              :class="['tab-btn', { active: currentExampleIndex === 0 }]"
+              @click.stop="setExample(0)"
+            >
+              例句1
+            </button>
+            <button 
+              v-if="word.example2"
+              :class="['tab-btn', { active: currentExampleIndex === 1 }]"
+              @click.stop="setExample(1)"
+            >
+              例句2
+            </button>
+            <button 
+              v-if="word.example3"
+              :class="['tab-btn', { active: currentExampleIndex === 2 }]"
+              @click.stop="setExample(2)"
+            >
+              例句3
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -187,7 +96,6 @@ const setExample = (index: number) => {
 
 .card-back {
   transform: rotateY(180deg);
-  overflow-y: auto;
 }
 
 .level-badge {
@@ -272,8 +180,8 @@ const setExample = (index: number) => {
 }
 
 .examples {
+  flex: 1;
   margin-bottom: var(--spacing-md);
-  text-align: left;
 }
 
 .example {
@@ -298,7 +206,8 @@ const setExample = (index: number) => {
 .example-tabs {
   display: flex;
   gap: var(--spacing-xs);
-  margin-top: var(--spacing-sm);
+  margin-top: auto;
+  padding-top: var(--spacing-md);
 }
 
 .tab-btn {
@@ -323,62 +232,84 @@ const setExample = (index: number) => {
     color: white;
   }
 }
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: var(--spacing-sm);
-}
-
-.tag {
-  background-color: #f0f0f0;
-  color: var(--text-light);
-  font-size: 0.8rem;
-  padding: 2px 6px;
-  border-radius: 10px;
-}
-
-.card-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: auto;
-}
-
-.action-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  
-  i {
-    margin-right: 4px;
-    font-size: 1rem;
-  }
-  
-  &.review-later {
-    background-color: #f8f9fa;
-    color: var(--text-color);
-    
-    &:hover {
-      background-color: #e9ecef;
-    }
-  }
-  
-  &.mark-mastered {
-    background-color: var(--success-color);
-    color: white;
-    
-    &:hover {
-      background-color: darken(#2ecc71, 10%);
-    }
-  }
-}
 </style>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const props = defineProps<{
+  word: {
+    id: string
+    kanji: string
+    kana: string
+    meaning: string
+    example: string
+    exampleMeaning?: string
+    example2?: string
+    example2Meaning?: string
+    example3?: string
+    example3Meaning?: string
+    level: string
+    tags?: string[]
+  }
+}>()
+
+const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
+
+const isFlipped = ref(false)
+const isFavorite = ref(false)
+const currentExampleIndex = ref(0)
+
+const toggleFlip = () => {
+  isFlipped.value = !isFlipped.value
+}
+
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value
+  emit('favorite', props.word.id, isFavorite.value)
+}
+
+const levelClass = computed(() => {
+  switch (props.word.level) {
+    case 'N5': return 'level-n5'
+    case 'N4': return 'level-n4'
+    case 'N3': return 'level-n3'
+    case 'N2': return 'level-n2'
+    case 'N1': return 'level-n1'
+    default: return ''
+  }
+})
+
+const currentExample = computed(() => {
+  switch (currentExampleIndex.value) {
+    case 0:
+      return {
+        text: props.word.example,
+        meaning: props.word.exampleMeaning
+      }
+    case 1:
+      return {
+        text: props.word.example2,
+        meaning: props.word.example2Meaning
+      }
+    case 2:
+      return {
+        text: props.word.example3,
+        meaning: props.word.example3Meaning
+      }
+    default:
+      return {
+        text: '',
+        meaning: ''
+      }
+  }
+})
+
+const hasExample = computed(() => {
+  return props.word.example || props.word.example2 || props.word.example3
+})
+
+const setExample = (index: number) => {
+  currentExampleIndex.value = index
+}
+</script>
