@@ -4,23 +4,19 @@
       <h2>注册</h2>
       <form @submit.prevent="handleRegister" class="auth-form">
         <div class="form-group">
-          <label>邮箱</label>
-          <input 
-            type="email" 
-            v-model="registerForm.email" 
-            required 
-            placeholder="请输入邮箱"
-          >
-        </div>
-
-        <div class="form-group">
-          <label>用户名</label>
-          <input 
-            type="text" 
-            v-model="registerForm.username" 
-            required 
-            placeholder="请输入用户名"
-          >
+          <label>手机号</label>
+          <div class="phone-input">
+            <div class="area-code" @click="showAreaCodeSelect = true">
+              <span>+{{ areaCode }}</span>
+              <i class="ri-arrow-down-s-line"></i>
+            </div>
+            <input 
+              type="tel" 
+              v-model="registerForm.phone" 
+              required 
+              placeholder="请输入手机号"
+            >
+          </div>
         </div>
         
         <div class="form-group">
@@ -61,7 +57,9 @@
           </label>
         </div>
 
-        <button type="submit" class="btn-submit">注册</button>
+        <button type="submit" class="btn-submit" :disabled="isSubmitting">
+          {{ isSubmitting ? '注册中...' : '注册' }}
+        </button>
 
         <div class="auth-links">
           已有账号？
@@ -69,47 +67,123 @@
         </div>
       </form>
     </div>
+
+    <!-- Area Code Select Dialog -->
+    <el-dialog
+      v-model="showAreaCodeSelect"
+      title="选择区号"
+      width="360px"
+      center
+      :show-close="false"
+      class="area-code-dialog"
+    >
+      <div class="area-code-list">
+        <div 
+          v-for="code in areaCodes" 
+          :key="code.code"
+          class="area-code-item"
+          @click="selectAreaCode(code.code)"
+        >
+          <span class="country">{{ code.country }}</span>
+          <span class="code">+{{ code.code }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showAreaCodeSelect = false">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import md5 from 'md5'
 
 const router = useRouter()
 const showPassword = ref(false)
+const isSubmitting = ref(false)
+const showAreaCodeSelect = ref(false)
+const areaCode = ref('86')
 
 const registerForm = ref({
-  email: '',
-  username: '',
+  phone: '',
   password: '',
   confirmPassword: '',
   agreement: false
 })
 
+const areaCodes = [
+  { country: '中国', code: '86' },
+  { country: '中国香港', code: '852' },
+  { country: '中国澳门', code: '853' },
+  { country: '中国台湾', code: '886' },
+  { country: '日本', code: '81' },
+  { country: '韩国', code: '82' }
+]
+
+const selectAreaCode = (code: string) => {
+  areaCode.value = code
+  showAreaCodeSelect.value = false
+}
+
 const handleRegister = async () => {
   try {
     if (registerForm.value.password !== registerForm.value.confirmPassword) {
-      alert('两次输入的密码不一致')
+      ElMessage.error('两次输入的密码不一致')
       return
     }
+
+    if (!registerForm.value.agreement) {
+      ElMessage.error('请阅读并同意服务条款和隐私政策')
+      return
+    }
+
+    isSubmitting.value = true
     
-    // TODO: Implement actual registration logic
-    console.log('Register form submitted:', registerForm.value)
+    const pwKey = "chunshualiguan"
+    const encryptedPassword = md5(registerForm.value.password + pwKey)
+    const phoneNumber = areaCode.value + registerForm.value.phone
+
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaRegister', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_account: "11",
+        password: encryptedPassword,
+        phone_number: phoneNumber,
+        user_name: "",
+        user_source: "官方网站",
+        registerType: 2
+      })
+    })
+
+    const data = await response.json()
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || '注册失败')
+    }
+
+    ElMessage.success('注册成功')
     router.push('/auth/login')
   } catch (error) {
-    console.error('Registration failed:', error)
+    ElMessage.error(error instanceof Error ? error.message : '注册失败，请稍后重试')
+  } finally {
+    isSubmitting.value = false
   }
 }
 
 const showTerms = () => {
-  // TODO: Implement terms dialog
-  console.log('Show terms')
+  router.push('/terms')
 }
 
 const showPrivacy = () => {
-  // TODO: Implement privacy dialog
-  console.log('Show privacy')
+  router.push('/privacy')
 }
 </script>
 
@@ -149,42 +223,61 @@ const showPrivacy = () => {
       color: var(--text-color);
       font-weight: 500;
     }
+  }
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 1rem;
+.phone-input {
+  display: flex;
+  gap: var(--spacing-xs);
 
-      &:focus {
-        outline: none;
-        border-color: var(--primary-color);
-      }
+  .area-code {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+
+    &:hover {
+      border-color: var(--primary-color);
     }
 
-    .agreement {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: var(--text-light);
-      cursor: pointer;
+    span {
+      font-size: 0.95rem;
+    }
+  }
 
-      a {
-        color: var(--primary-color);
-        text-decoration: none;
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
 
-        &:hover {
-          text-decoration: underline;
-        }
-      }
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
   }
 }
 
 .password-input {
   position: relative;
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
 
   .toggle-password {
     position: absolute;
@@ -203,6 +296,24 @@ const showPrivacy = () => {
   }
 }
 
+.agreement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  cursor: pointer;
+
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .btn-submit {
   width: 100%;
   padding: 12px;
@@ -215,8 +326,13 @@ const showPrivacy = () => {
   cursor: pointer;
   transition: background-color var(--transition-fast);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--primary-dark);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 }
 
@@ -235,5 +351,43 @@ const showPrivacy = () => {
       text-decoration: underline;
     }
   }
+}
+
+.area-code-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .area-code-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .area-code-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background-color: var(--background-color);
+    }
+
+    .country {
+      font-weight: 500;
+    }
+
+    .code {
+      color: var(--text-light);
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
 }
 </style>
