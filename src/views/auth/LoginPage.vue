@@ -166,6 +166,9 @@ const handleLogin = async () => {
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
     
+    // 打印加密后的密码
+    console.log('Encrypted Password:', encryptedPassword)
+    
     const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
       method: 'POST',
       headers: {
