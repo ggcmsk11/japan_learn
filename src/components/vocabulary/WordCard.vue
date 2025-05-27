@@ -12,7 +12,7 @@
           <p class="kana">{{ word.kana }}</p>
           <p class="meaning">{{ word.meaning }}</p>
           
-          <div class="card-action">
+          <div class="card-action" @click.stop="isFlipped = true">
             <p class="card-hint">点击查看例句</p>
           </div>
         </div>
@@ -177,6 +177,7 @@
   color: var(--text-muted);
   margin-top: var(--spacing-md);
   text-align: center;
+  cursor: pointer;
 }
 
 .examples {
@@ -259,10 +260,6 @@ const emit = defineEmits(['reviewLater', 'markMastered', 'favorite'])
 const isFlipped = ref(false)
 const isFavorite = ref(false)
 const currentExampleIndex = ref(0)
-
-const toggleFlip = () => {
-  isFlipped.value = !isFlipped.value
-}
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
