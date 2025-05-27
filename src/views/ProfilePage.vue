@@ -15,29 +15,29 @@
       </div>
 
       <div class="profile-content">
-<div class="info-section">
-  <h2><i class="ri-user-3-line"></i> 基本信息</h2>
-  <div class="info-grid">
-    <div class="info-item">
-      <label>用户账号</label>
-      <span>{{ authStore.userInfo?.userAccount }}</span>
-    </div>
-    <div class="info-item">
-      <label>手机号</label>
-      <span>{{ authStore.userInfo?.userAccount }}</span>
-    </div>
-    <div class="info-item">
-      <label>邮箱</label>
-      <span>{{ authStore.userInfo?.email || '未设置' }}</span>
-    </div>
-    <div class="info-item">
-      <label>账号状态</label>
-      <span :class="['status-badge', authStore.userInfo?.isActive ? 'active' : 'inactive']">
-        {{ authStore.userInfo?.isActive ? '已激活' : '未激活' }}
-      </span>
-    </div>
-  </div>
-</div>
+        <div class="info-section">
+          <h2><i class="ri-user-3-line"></i> 基本信息</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>用户账号</label>
+              <span>{{ authStore.userInfo?.userAccount }}</span>
+            </div>
+            <div class="info-item">
+              <label>手机号</label>
+              <span>{{ authStore.userInfo?.userAccount }}</span>
+            </div>
+            <div class="info-item">
+              <label>邮箱</label>
+              <span>{{ authStore.userInfo?.email || '未设置' }}</span>
+            </div>
+            <div class="info-item">
+              <label>账号状态</label>
+              <span :class="['status-badge', authStore.userInfo?.isActive ? 'active' : 'inactive']">
+                {{ authStore.userInfo?.isActive ? '已激活' : '未激活' }}
+              </span>
+            </div>
+          </div>
+        </div>
 
 
         <div class="info-section">
