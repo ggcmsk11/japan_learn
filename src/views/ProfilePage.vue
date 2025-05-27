@@ -24,7 +24,7 @@
             </div>
             <div class="info-item">
               <label>手机号</label>
-              <span>{{ authStore.userInfo?.userAccount }}</span>
+              <span>{{ authStore.phoneNumber || authStore.userInfo?.phoneNumber || '未设置' }}</span>
             </div>
             <div class="info-item">
               <label>邮箱</label>
