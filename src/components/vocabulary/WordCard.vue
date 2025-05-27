@@ -1,6 +1,6 @@
 <template>
   <div class="word-card">
-    <div class="card-inner">
+    <div :class="['card-inner', { 'is-flipped': isFlipped }]">
       <div class="card-front">
         <div :class="['level-badge', levelClass]">{{ word.level }}</div>
         <div class="favorite-btn" @click.stop="toggleFavorite">
