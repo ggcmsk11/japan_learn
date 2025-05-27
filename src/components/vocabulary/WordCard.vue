@@ -145,8 +145,6 @@ const setExample = (index: number) => {
               </button>
             </div>
           </div>
-          
-          
         </div>
       </div>
     </div>
