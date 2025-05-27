@@ -121,7 +121,7 @@ const fetchWords = async () => {
     })
 
     if (response.data.code === 200) {
-      words.value = [...words.value, ...response.data.data]
+      words.value = response.data.data
     } else {
       throw new Error(response.data.msg || '获取单词失败')
     }
