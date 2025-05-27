@@ -165,7 +165,7 @@ const handleLogin = async () => {
     // 密码加密
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
-    console.log(areaCode.value+loginForm.value.phone)
+    console.log(11111)
     
     const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
       method: 'POST',
