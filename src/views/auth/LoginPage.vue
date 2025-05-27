@@ -172,7 +172,7 @@ const handleLogin = async () => {
         phone_number: areaCode.value + loginForm.value.phone,
         device_info: "1",
         ip_address: "1",
-        loginType: 0
+        loginType: 2
       })
     })
     
