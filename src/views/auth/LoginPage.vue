@@ -174,10 +174,10 @@ const handleLogin = async () => {
       body: JSON.stringify({
         user_account: "11",
         password: encryptedPassword,
-        phone_number: "8619818941549",
+        phone_number: `${areaCode.value}${loginForm.value.phone}`,
         device_info: "1",
         ip_address: "1",
-        loginType: 2
+        loginType: 0
       })
     })
     
@@ -187,12 +187,8 @@ const handleLogin = async () => {
       throw new Error(data.msg || '登录失败')
     }
     
-    // 存储用户信息
-    localStorage.setItem('token', data.data.token)
-    localStorage.setItem('userId', data.data.userId)
-    
-    // 更新用户信息和权限
-    authStore.login()
+    // 存储用户信息到 store
+    authStore.login(data.data.token, data.data)
     
     // 跳转到首页或之前的页面
     const redirect = route.query.redirect as string
