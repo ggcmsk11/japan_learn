@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="vocabulary-page">
     <div class="page-header">
@@ -60,7 +59,7 @@
           @click="loadMore"
           :disabled="loading"
         >
-          {{ loading ? '加载中...' : '加载更多' }}
+          {{ loading ? '加载中...' : '再来一组单词' }}
         </button>
       </div>
     </div>
@@ -247,4 +246,3 @@ onMounted(() => {
   }
 }
 </style>
-```
