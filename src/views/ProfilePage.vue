@@ -10,7 +10,7 @@
         </div>
         <button class="btn-edit" @click="navigateToEdit">
           <i class="ri-edit-line"></i>
-          编辑资料
+          修改密码
         </button>
       </div>
 
