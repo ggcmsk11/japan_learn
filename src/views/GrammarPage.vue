@@ -103,6 +103,8 @@ const getConfig = () => {
     userId: authStore.userInfo.userId,
     token: authStore.token,
     user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
+    jpltLevel: N1,
+    grammarCount: 2 ,
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241
