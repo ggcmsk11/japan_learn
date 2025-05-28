@@ -158,16 +158,12 @@ const selectAreaCode = (code: string) => {
   showAreaCodeSelect.value = false
 }
 
-// In LoginPage.vue login function
 const handleLogin = async () => {
   try {
     isSubmitting.value = true
     
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
-    
-    // 打印加密后的密码
-    console.log('Encrypted Password:', encryptedPassword)
     
     const phoneNumber = areaCode.value + loginForm.value.phone
     
@@ -192,14 +188,20 @@ const handleLogin = async () => {
       throw new Error(data.msg || '登录失败')
     }
     
-    // 存储用户信息到 store，并传入手机号
+    // Store user info in store
     authStore.login(data.data.token, data.data, phoneNumber)
     
-    // 跳转到首页或之前的页面
+    // Show success message for 3 seconds
+    ElMessage({
+      message: '登录成功',
+      type: 'success',
+      duration: 3000
+    })
+    
+    // Redirect after successful login
     const redirect = route.query.redirect as string
     router.push(redirect || '/profile')
     
-    ElMessage.success('登录成功')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
   } finally {
