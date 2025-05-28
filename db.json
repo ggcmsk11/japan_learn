@@ -168,6 +168,59 @@
           ]
         }
       ]
+    },
+    {
+      "id": "jlpt-n4-2022",
+      "title": "JLPT N4 模擬試験 2022年",
+      "level": "N4",
+      "year": "2022",
+      "timeLimit": 120,
+      "sections": [
+        {
+          "id": "reading",
+          "title": "読解",
+          "questions": [
+            {
+              "id": "reading-1",
+              "text": "私は毎朝6時に起きます。朝ご飯を食べてから、会社に行きます。電車で30分かかります。会社は9時から5時までです。仕事が終わってから、よくジムに行きます。運動は健康にいいと思います。",
+              "question": "作者每天早上几点起床？",
+              "options": ["5点", "6点", "7点", "8点"],
+              "correctAnswer": 1,
+              "explanation": "文章开头提到"私は毎朝6時に起きます"，表示每天早上6点起床。"
+            },
+            {
+              "id": "reading-2",
+              "text": "来週の土曜日、私の誕生日パーティーをします。場所は私の家です。時間は午後2時からです。友達が10人来ます。みんなでケーキを食べて、ゲームをする予定です。とても楽しみです。",
+              "question": "生日派对什么时候开始？",
+              "options": ["上午10点", "中午12点", "下午2点", "下午4点"],
+              "correctAnswer": 2,
+              "explanation": "文中提到"時間は午後2時からです"，表示派对从下午2点开始。"
+            }
+          ]
+        },
+        {
+          "id": "listening",
+          "title": "聴解",
+          "questions": [
+            {
+              "id": "listening-1",
+              "audioUrl": "https://example.com/audio3.mp3",
+              "text": "女子想买什么？",
+              "options": ["面包", "蛋糕", "饮料", "水果"],
+              "correctAnswer": 1,
+              "explanation": "对话中女子说要买蛋糕。"
+            },
+            {
+              "id": "listening-2",
+              "audioUrl": "https://example.com/audio4.mp3",
+              "text": "餐厅几点开始营业？",
+              "options": ["10:00", "11:00", "12:00", "13:00"],
+              "correctAnswer": 1,
+              "explanation": "通知中提到餐厅从11点开始营业。"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
