@@ -89,10 +89,8 @@ import { useAuthStore } from '../stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-// API配置
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
 
-// Get dynamic user data from auth store
 const getConfig = () => {
   if (!authStore.userInfo) {
     router.push('/auth/login')
@@ -106,6 +104,7 @@ const getConfig = () => {
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
+    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
     grammarCount: 6
   }
 }
@@ -143,10 +142,7 @@ const fetchGrammar = async () => {
 
   try {
     const config = getConfig()
-    const response = await axios.post(API_URL, {
-      ...config,
-      jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value
-    })
+    const response = await axios.post(API_URL, config)
 
     if (response.data.code === 200) {
       grammarPoints.value = response.data.data
