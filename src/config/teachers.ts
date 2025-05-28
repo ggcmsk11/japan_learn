@@ -82,6 +82,50 @@ export const teachers: TeacherInfo[] = [
     ]
   },
   {
+    id: 'zhang',
+    name: '张雨晴',
+    nameEn: 'Zhang Yuqing',
+    role: '会话训练师',
+    image: 'https://images.pexels.com/photos/5793953/pexels-photo-5793953.jpeg?auto=compress&cs=tinysrgb&w=600',
+    description: '提供生动有趣的会话课程，帮助学员掌握自然的日常对话。',
+    expertise: ['日常会话', '敬语训练', '发音指导'],
+    education: [
+      '上海外国语大学 日语系硕士',
+      '日语教学资格证'
+    ],
+    experience: [
+      '在线日语讲师（2015年至今）',
+      '会话教材开发（2017年至今）'
+    ],
+    languages: [
+      { language: '中文', level: '母语' },
+      { language: '日语', level: 'N1' },
+      { language: '英语', level: '精通' }
+    ]
+  },
+  {
+    id: 'zhang',
+    name: '张雨晴',
+    nameEn: 'Zhang Yuqing',
+    role: '会话训练师',
+    image: 'https://images.pexels.com/photos/5793953/pexels-photo-5793953.jpeg?auto=compress&cs=tinysrgb&w=600',
+    description: '提供生动有趣的会话课程，帮助学员掌握自然的日常对话。',
+    expertise: ['日常会话', '敬语训练', '发音指导'],
+    education: [
+      '上海外国语大学 日语系硕士',
+      '日语教学资格证'
+    ],
+    experience: [
+      '在线日语讲师（2015年至今）',
+      '会话教材开发（2017年至今）'
+    ],
+    languages: [
+      { language: '中文', level: '母语' },
+      { language: '日语', level: 'N1' },
+      { language: '英语', level: '精通' }
+    ]
+  },
+  {
     id: 'chen',
     name: '陈思远',
     nameEn: 'Chen Siyuan',
