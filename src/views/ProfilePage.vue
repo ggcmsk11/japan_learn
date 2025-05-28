@@ -246,9 +246,33 @@ const handleRedeem = async () => {
       throw new Error(data.msg || '兑换失败')
     }
 
+    // Show success message
     ElMessage.success('兑换成功')
     showRedeemDialog.value = false
     redeemCode.value = ''
+
+    // Re-login to refresh user info
+    const loginResponse = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_account: "11",
+        password: "b35150c2cf0c1edea3c5fca8c2e79d32",
+        phone_number: authStore.phoneNumber?.replace(/^\+/, ''),
+        device_info: "1",
+        ip_address: "1",
+        loginType: 2
+      })
+    })
+
+    const loginData = await loginResponse.json()
+
+    if (loginData.code === 200) {
+      // Update store with new user info
+      authStore.login(loginData.data.token, loginData.data, authStore.phoneNumber || '')
+    }
 
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '兑换失败，请稍后重试')
