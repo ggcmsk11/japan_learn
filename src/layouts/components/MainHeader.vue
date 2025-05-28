@@ -22,9 +22,25 @@
         
         <div class="header-actions">
           <template v-if="authStore.isLoggedIn">
-            <div class="user-info" @click="navigateTo('/profile')">
-              <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600" alt="用户头像" class="user-avatar">
-              <span class="user-name">张三</span>
+            <div class="user-info">
+              <el-dropdown trigger="click">
+                <div class="user-avatar-wrapper">
+                  <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600" alt="用户头像" class="user-avatar">
+                  <span class="user-name">{{ authStore.userInfo?.userName }}</span>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="navigateTo('/profile')">
+                      <i class="ri-user-line"></i>
+                      个人中心
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="handleLogout">
+                      <i class="ri-logout-box-line"></i>
+                      退出登录
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
           <template v-else>
@@ -87,6 +103,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -115,6 +132,16 @@ const navigateTo = (path: string) => {
 
 const goBack = () => {
   router.back()
+}
+
+const handleLogout = () => {
+  authStore.logout()
+  ElMessage({
+    message: '已退出登录',
+    type: 'success',
+    duration: 1000
+  })
+  router.push('/auth/login')
 }
 
 onMounted(() => {
@@ -253,30 +280,45 @@ onUnmounted(() => {
 
 .user-info {
   display: none;
+  
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.user-avatar-wrapper {
+  display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  cursor: pointer;
   padding: 4px;
   border-radius: 20px;
+  cursor: pointer;
   transition: background-color var(--transition-fast);
-
-  @media (min-width: 768px) {
-    display: flex;
-  }
 
   &:hover {
     background-color: var(--background-color);
   }
+}
 
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-  .user-name {
-    font-weight: 500;
+.user-name {
+  font-weight: 500;
+}
+
+:deep(.el-dropdown-menu__item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  
+  i {
+    font-size: 1.1rem;
   }
 }
 
