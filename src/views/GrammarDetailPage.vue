@@ -56,9 +56,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 interface Grammar {
   grammarId: number
@@ -77,10 +79,19 @@ interface Grammar {
 const grammar = ref<Grammar | null>(null)
 
 onMounted(() => {
+  // Check authentication
+  if (!authStore.isLoggedIn) {
+    router.push({
+      path: '/auth/login',
+      query: { redirect: route.fullPath }
+    })
+    return
+  }
+
   // Get grammar data from router state
-  const state = history.state?.state
-  if (state?.grammar) {
-    grammar.value = state.grammar
+  const state = router.currentRoute.value.state
+  if (state && 'grammar' in state) {
+    grammar.value = state.grammar as Grammar
   } else {
     // If no data in state, go back to grammar list
     router.push('/grammar')
