@@ -92,20 +92,15 @@ const authStore = useAuthStore()
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
 
 const getConfig = () => {
-  if (!authStore.userInfo) {
-    router.push('/auth/login')
-    throw new Error('请先登录')
-  }
-  
   return {
-    userId: authStore.userInfo.userId,
-    token: authStore.token,
+    userId: authStore.userInfo?.userId || '',
+    token: authStore.token || '',
     user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
-    grammarCount: 6,
-    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value
+    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
+    grammarCount: 6
   }
 }
 
