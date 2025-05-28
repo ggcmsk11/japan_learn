@@ -78,10 +78,6 @@ const authStore = useAuthStore()
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
 
 const getConfig = () => {
-  // When level is '全部', send 'N' as jpltLevel
-  // Otherwise, send the actual level (N1, N2, etc.)
-  const jpltLevel = currentLevel.value === '全部' ? 'N' : currentLevel.value
-
   return {
     userId: authStore.userInfo?.userId || '',
     token: authStore.token || '',
@@ -89,7 +85,7 @@ const getConfig = () => {
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
-    jpltLevel: jpltLevel,
+    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
     grammarCount: 6
   }
 }
@@ -115,14 +111,12 @@ const error = ref('')
 
 const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
 
-const setLevel = (level: string) => {
-  if (!authStore.isLoggedIn) {
-    router.push('/auth/login')
-    return
-  }
+const setLevel = async (level: string) => {
+  if (level === currentLevel.value) return
+  
   currentLevel.value = level
   grammarPoints.value = []
-  fetchGrammar()
+  await fetchGrammar()
 }
 
 const fetchGrammar = async () => {
@@ -165,7 +159,7 @@ const navigateToDetail = (grammar: GrammarPoint) => {
     return
   }
   
-  // Store grammar data in sessionStorage instead of history state
+  // Store grammar data in sessionStorage
   sessionStorage.setItem('currentGrammar', JSON.stringify(grammar))
   router.push(`/grammar/${grammar.grammarId}`)
 }
