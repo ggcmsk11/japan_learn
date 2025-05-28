@@ -199,11 +199,11 @@ const handleLogin = async () => {
       }))
     }
 
-    // Show success message for 3 seconds
+    // Show success message for 1 second
     ElMessage({
       message: '登录成功',
       type: 'success',
-      duration: 3000
+      duration: 1000
     })
     
     // Redirect after successful login
@@ -216,7 +216,6 @@ const handleLogin = async () => {
     isSubmitting.value = false
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
