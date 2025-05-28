@@ -2,7 +2,7 @@
   <div class="profile-edit-page">
     <div class="container">
       <div class="edit-header">
-        <h1>编辑个人资料</h1>
+        <h1>修改密码</h1>
         <button class="btn-back" @click="router.back()">
           <i class="ri-arrow-left-line"></i>
           返回
@@ -11,50 +11,7 @@
 
       <form class="edit-form" @submit.prevent="handleSubmit">
         <div class="form-section">
-          <h2>基本信息</h2>
-          
-          <div class="avatar-upload">
-            <div class="avatar-preview">
-              <img :src="formData.avatar" alt="头像预览">
-            </div>
-            <button type="button" class="btn-upload">
-              <i class="ri-upload-2-line"></i>
-              更换头像
-            </button>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label>昵称</label>
-              <input 
-                type="text" 
-                v-model="formData.nickname"
-                placeholder="请输入昵称"
-              >
-            </div>
-
-            <div class="form-group">
-              <label>手机号</label>
-              <input 
-                type="tel" 
-                v-model="formData.phone"
-                placeholder="请输入手机号"
-              >
-            </div>
-
-            <div class="form-group">
-              <label>邮箱</label>
-              <input 
-                type="email" 
-                v-model="formData.email"
-                placeholder="请输入邮箱"
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h2>安全设置</h2>
+          <h2>密码设置</h2>
           <div class="form-grid">
             <div class="form-group">
               <label>当前密码</label>
@@ -62,6 +19,7 @@
                 type="password" 
                 v-model="formData.currentPassword"
                 placeholder="请输入当前密码"
+                required
               >
             </div>
 
@@ -71,6 +29,7 @@
                 type="password" 
                 v-model="formData.newPassword"
                 placeholder="请输入新密码"
+                required
               >
             </div>
 
@@ -80,6 +39,7 @@
                 type="password" 
                 v-model="formData.confirmPassword"
                 placeholder="请再次输入新密码"
+                required
               >
             </div>
           </div>
@@ -87,7 +47,9 @@
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" @click="router.back()">取消</button>
-          <button type="submit" class="btn-save">保存修改</button>
+          <button type="submit" class="btn-save" :disabled="isSubmitting">
+            {{ isSubmitting ? '保存中...' : '保存修改' }}
+          </button>
         </div>
       </form>
     </div>
@@ -98,14 +60,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../stores/auth'
+import md5 from 'md5'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const isSubmitting = ref(false)
 
 const formData = ref({
-  avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600',
-  nickname: '张三',
-  phone: '13888888888',
-  email: 'user123@example.com',
   currentPassword: '',
   newPassword: '',
   confirmPassword: ''
@@ -113,19 +75,45 @@ const formData = ref({
 
 const handleSubmit = async () => {
   try {
-    // TODO: Implement profile update logic
+    // Validate passwords match
+    if (formData.value.newPassword !== formData.value.confirmPassword) {
+      ElMessage.error('两次输入的新密码不一致')
+      return
+    }
+
+    isSubmitting.value = true
     
-    ElMessage({
-      message: '个人资料更新成功',
-      type: 'success'
+    // Encrypt password with md5
+    const pwKey = "chunshualiguan"
+    const encryptedPassword = md5(formData.value.newPassword + pwKey)
+
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/changePassword', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: authStore.userInfo?.userId,
+        token: authStore.token,
+        phoneNumber: authStore.phoneNumber?.replace(/^\+/, ''),
+        userAccount: "1111",
+        newPassword: encryptedPassword,
+        loginType: 0
+      })
     })
-    
+
+    const data = await response.json()
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || '修改密码失败')
+    }
+
+    ElMessage.success('密码修改成功')
     router.back()
   } catch (error) {
-    ElMessage({
-      message: error instanceof Error ? error.message : '更新失败，请稍后重试',
-      type: 'error'
-    })
+    ElMessage.error(error instanceof Error ? error.message : '修改失败，请稍后重试')
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
@@ -190,44 +178,6 @@ const handleSubmit = async () => {
   }
 }
 
-.avatar-upload {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-}
-
-.avatar-preview {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid var(--primary-color);
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.btn-upload {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--background-color);
-  border: 1px solid var(--border-color);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  
-  &:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-}
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -268,6 +218,11 @@ const handleSubmit = async () => {
     border-radius: 4px;
     cursor: pointer;
     transition: all var(--transition-fast);
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
   }
   
   .btn-cancel {
@@ -285,7 +240,7 @@ const handleSubmit = async () => {
     color: white;
     border: none;
     
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: var(--primary-dark);
     }
   }
