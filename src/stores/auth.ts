@@ -19,7 +19,7 @@ interface UserInfo {
 
 export const useAuthStore = defineStore('auth', () => {
   // Initialize state from localStorage if available
-  const savedState = localStorage.getItem('loginState')
+  const savedState = localStorage.getItem('authState')
   const initialState = savedState ? JSON.parse(savedState) : null
 
   const isLoggedIn = ref(!!initialState)
@@ -50,14 +50,21 @@ export const useAuthStore = defineStore('auth', () => {
       N2: !!user.japaneseN2,
       N1: !!user.japaneseN1
     }
+
+    // Save auth state to localStorage
+    localStorage.setItem('authState', JSON.stringify({
+      token: tokenValue,
+      userInfo: user,
+      phoneNumber: phone
+    }))
   }
 
   const logout = () => {
     isLoggedIn.value = false
     token.value = ''
     userInfo.value = null
-    localStorage.removeItem('loginState')
-    localStorage.removeItem('token')
+    phoneNumber.value = ''
+    localStorage.removeItem('authState')
   }
 
   const hasPermission = (level: string) => {
