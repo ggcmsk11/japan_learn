@@ -177,7 +177,7 @@ const redeemCode = ref('')
 const isRedeeming = ref(false)
 
 const userRole = computed(() => {
-  return authStore.userInfo?.userRole === 0 ? '普通用户' : '教师'
+  return authStore.userInfo?.isPaid === 0 ? '普通用户' : '教师'
 })
 
 const maskedPhone = computed(() => {
