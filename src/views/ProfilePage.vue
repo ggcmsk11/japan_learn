@@ -51,7 +51,7 @@
             <div class="info-item">
               <label>会员状态</label>
               <span :class="['status-badge', authStore.userInfo?.isPaid === 0 ? 'active' : 'inactive']">
-                {{ authStore.userInfo?.isPaid === 0 ? 'VIP会员' : '普通用户' }}
+                {{ authStore.userInfo?.isPaid === 1 ? 'VIP会员' : '普通用户' }}
               </span>
             </div>
           </div>
