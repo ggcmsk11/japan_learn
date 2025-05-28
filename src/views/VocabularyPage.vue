@@ -78,7 +78,7 @@ const DEFAULT_CONFIG = {
   userId: '20250309125643',
   token: '99b90b812938ea7929fc5f267f305843',
   user_phone: '15998658809',
-  loginType: 0,
+  loginType: 2,
   useType: 0,
   userTypeUseWordId: 2025000488,
   wordCount: 10
