@@ -14,16 +14,6 @@
           <h2>密码设置</h2>
           <div class="form-grid">
             <div class="form-group">
-              <label>当前密码</label>
-              <input 
-                type="password" 
-                v-model="formData.currentPassword"
-                placeholder="请输入当前密码"
-                required
-              >
-            </div>
-
-            <div class="form-group">
               <label>新密码</label>
               <input 
                 type="password" 
@@ -68,7 +58,6 @@ const authStore = useAuthStore()
 const isSubmitting = ref(false)
 
 const formData = ref({
-  currentPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
@@ -108,8 +97,17 @@ const handleSubmit = async () => {
       throw new Error(data.msg || '修改密码失败')
     }
 
-    ElMessage.success('密码修改成功')
-    router.back()
+    // Show success message for 1 second
+    ElMessage({
+      message: '密码修改成功',
+      type: 'success',
+      duration: 1000,
+      onClose: () => {
+        // Logout and redirect to login page
+        authStore.logout()
+        router.push('/auth/login')
+      }
+    })
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '修改失败，请稍后重试')
   } finally {
