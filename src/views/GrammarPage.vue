@@ -39,27 +39,13 @@
           v-for="point in grammarPoints" 
           :key="point.grammarId"
           class="grammar-card"
+          @click="navigateToDetail(point)"
         >
           <div class="level-badge">{{ point.jlptLevel }}</div>
           <h3>{{ point.grammarName }}</h3>
           <p class="explanation">{{ point.grammarMeaning }}</p>
           
-          <div class="usage-list">
-            <div class="usage-item" v-if="point.exampleSentence1">
-              {{ point.exampleSentence1 }}
-              <div class="example-meaning">{{ point.exampleTranslation1 }}</div>
-            </div>
-            <div class="usage-item" v-if="point.exampleSentence2">
-              {{ point.exampleSentence2 }}
-              <div class="example-meaning">{{ point.exampleTranslation2 }}</div>
-            </div>
-            <div class="usage-item" v-if="point.exampleSentence3">
-              {{ point.exampleSentence3 }}
-              <div class="example-meaning">{{ point.exampleTranslation3 }}</div>
-            </div>
-          </div>
-          
-          <button class="btn-detail" @click="navigateToDetail(point.grammarId)">
+          <button class="btn-detail">
             查看详情
             <i class="ri-arrow-right-line"></i>
           </button>
@@ -80,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, provide } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
@@ -156,13 +142,19 @@ const loadMore = () => {
   fetchGrammar()
 }
 
-const navigateToDetail = (grammarId: number) => {
-  router.push(`/grammar/${grammarId}`)
+const navigateToDetail = (grammar: GrammarPoint) => {
+  router.push({
+    path: `/grammar/${grammar.grammarId}`,
+    state: { grammar }
+  })
 }
 
 onMounted(() => {
   fetchGrammar()
 })
+
+// Provide grammar points to be used by detail page
+provide('grammarPoints', grammarPoints)
 </script>
 
 <style lang="scss" scoped>
@@ -287,27 +279,6 @@ h3 {
   color: var(--text-light);
   margin-bottom: var(--spacing-md);
   line-height: 1.6;
-}
-
-.usage-list {
-  margin-bottom: var(--spacing-md);
-}
-
-.usage-item {
-  background-color: var(--background-color);
-  padding: var(--spacing-sm);
-  border-radius: 4px;
-  margin-bottom: var(--spacing-xs);
-  font-family: monospace;
-  font-size: 0.95rem;
-
-  .example-meaning {
-    font-size: 0.9rem;
-    color: var(--text-light);
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid var(--border-color);
-  }
 }
 
 .btn-detail {

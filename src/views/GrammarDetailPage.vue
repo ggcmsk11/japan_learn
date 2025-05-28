@@ -16,15 +16,6 @@
           <p class="jp-text">{{ grammar?.grammarMeaning }}</p>
         </section>
         
-        <section class="usage-section">
-          <h3>使い方</h3>
-          <div class="usage-list">
-            <div class="usage-item" v-if="grammar?.grammarForm">
-              {{ grammar.grammarForm }}
-            </div>
-          </div>
-        </section>
-        
         <section class="examples-section">
           <h3>例文</h3>
           <div class="example-cards">
@@ -48,14 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, inject } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
-const authStore = useAuthStore()
 const grammarId = route.params.id
 
 interface Grammar {
@@ -72,31 +59,14 @@ interface Grammar {
   jlptLevel: string
 }
 
+// Get grammar points from parent component
+const grammarPoints = inject<Ref<Grammar[]>>('grammarPoints')
 const grammar = ref<Grammar | null>(null)
 
-const fetchGrammarDetail = async () => {
-  try {
-    const response = await axios.post('https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards', {
-      userId: authStore.userInfo?.userId,
-      token: authStore.token,
-      user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-      loginType: 0,
-      useType: 2,
-      userTypeUseGrammarId: 2025000241
-    })
-
-    if (response.data.code === 200 && response.data.data.length > 0) {
-      grammar.value = response.data.data[0]
-    } else {
-      throw new Error('获取语法详情失败')
-    }
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '获取语法详情失败')
-  }
-}
-
 onMounted(() => {
-  fetchGrammarDetail()
+  if (grammarPoints?.value) {
+    grammar.value = grammarPoints.value.find(g => g.grammarId.toString() === grammarId)
+  }
 })
 </script>
 
@@ -149,18 +119,6 @@ section {
     margin-bottom: var(--spacing-lg);
     color: var(--primary-color);
   }
-}
-
-.usage-list {
-  background-color: var(--background-color);
-  border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
-}
-
-.usage-item {
-  font-family: monospace;
-  font-size: 1.1rem;
-  line-height: 1.6;
 }
 
 .example-cards {
