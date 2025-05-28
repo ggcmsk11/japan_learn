@@ -130,10 +130,6 @@ const navigateTo = (path: string) => {
   isMenuOpen.value = false
 }
 
-const goBack = () => {
-  router.back()
-}
-
 const handleLogout = () => {
   authStore.logout()
   ElMessage({
@@ -142,6 +138,10 @@ const handleLogout = () => {
     duration: 1000
   })
   router.push('/auth/login')
+}
+
+const goBack = () => {
+  router.back()
 }
 
 onMounted(() => {
