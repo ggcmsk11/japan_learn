@@ -50,5 +50,17 @@ export const courses: Course[] = [
     price: 14800,
     tag: 'new',
     description: '掌握中级日语，提高实际应用能力。'
-  }
+  },
+  {
+    id: 'n100-elementary',
+    title: 'JLPT N4 基础课程',
+    level: 'N4',
+    image: 'https://images.pexels.com/photos/5428003/pexels-photo-5428003.jpeg?auto=compress&cs=tinysrgb&w=600',
+    lessons: 25,
+    duration: '12周',
+    rating: 4.7,
+    students: 980,
+    price: 12800,
+    description: '进一步提升日语水平，加强听说读写能力。'
+  },
 ]
