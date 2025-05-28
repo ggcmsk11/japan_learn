@@ -89,9 +89,9 @@ onMounted(() => {
   }
 
   // Get grammar data from router state
-  const state = router.currentRoute.value.state
-  if (state && 'grammar' in state) {
-    grammar.value = state.grammar as Grammar
+  const state = history.state?.grammar
+  if (state) {
+    grammar.value = state
   } else {
     // If no data in state, go back to grammar list
     router.push('/grammar')
