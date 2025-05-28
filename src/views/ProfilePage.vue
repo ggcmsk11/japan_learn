@@ -8,10 +8,16 @@
             <p class="user-role">{{ userRole }}</p>
           </div>
         </div>
-        <button class="btn-edit" @click="navigateToEdit">
-          <i class="ri-edit-line"></i>
-          修改密码
-        </button>
+        <div class="header-actions">
+          <button class="btn-redeem" @click="showRedeemDialog = true">
+            <i class="ri-coupon-line"></i>
+            兑换码
+          </button>
+          <button class="btn-edit" @click="navigateToEdit">
+            <i class="ri-edit-line"></i>
+            修改密码
+          </button>
+        </div>
       </div>
 
       <div class="profile-content">
@@ -38,7 +44,6 @@
             </div>
           </div>
         </div>
-
 
         <div class="info-section">
           <h2><i class="ri-vip-crown-2-line"></i> 会员信息</h2>
@@ -120,18 +125,56 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- Redeem Code Dialog -->
+    <el-dialog
+      v-model="showRedeemDialog"
+      title="兑换VIP会员"
+      width="360px"
+      center
+      :show-close="false"
+      class="redeem-dialog"
+    >
+      <div class="redeem-form">
+        <div class="form-group">
+          <label>兑换码</label>
+          <input 
+            type="text" 
+            v-model="redeemCode"
+            placeholder="请输入兑换码"
+            maxlength="8"
+          >
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showRedeemDialog = false">取消</el-button>
+          <el-button 
+            type="primary" 
+            @click="handleRedeem"
+            :loading="isRedeeming"
+          >
+            {{ isRedeeming ? '兑换中...' : '确认兑换' }}
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const showPurchaseDialog = ref(false)
 const showDownloadDialog = ref(false)
+const showRedeemDialog = ref(false)
+const redeemCode = ref('')
+const isRedeeming = ref(false)
 
 const userRole = computed(() => {
   return authStore.userInfo?.userRole === 0 ? '普通用户' : '教师'
@@ -173,6 +216,46 @@ const downloadApp = () => {
   showPurchaseDialog.value = false
   showDownloadDialog.value = true
 }
+
+const handleRedeem = async () => {
+  if (!redeemCode.value) {
+    ElMessage.error('请输入兑换码')
+    return
+  }
+
+  isRedeeming.value = true
+
+  try {
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/redeemCode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: authStore.userInfo?.userId,
+        token: authStore.token,
+        phone_number: authStore.phoneNumber?.replace(/^\+/, ''),
+        redeemCode: redeemCode.value,
+        loginType: 2
+      })
+    })
+
+    const data = await response.json()
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || '兑换失败')
+    }
+
+    ElMessage.success('兑换成功')
+    showRedeemDialog.value = false
+    redeemCode.value = ''
+
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '兑换失败，请稍后重试')
+  } finally {
+    isRedeeming.value = false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -207,7 +290,13 @@ const downloadApp = () => {
   }
 }
 
-.btn-edit {
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.btn-edit,
+.btn-redeem {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -388,6 +477,38 @@ const downloadApp = () => {
 
     &.ios {
       background-color: #000000;
+    }
+  }
+}
+
+.redeem-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .redeem-form {
+    padding: var(--spacing-md) 0;
+
+    .form-group {
+      label {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-light);
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
+        }
+      }
     }
   }
 }
