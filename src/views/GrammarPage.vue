@@ -16,152 +16,150 @@
               v-for="level in levels"
               :key="level"
               :class="['filter-btn', { active: currentLevel === level }]"
-              @click="filterGrammar('level', level)"
+              @click="setLevel(level)"
             >
               {{ level }}
             </button>
           </div>
         </div>
-
-        <div class="filter-group">
-          <label>类型</label>
-          <div class="filter-buttons">
-            <button 
-              v-for="type in types"
-              :key="type"
-              :class="['filter-btn', { active: currentType === type }]"
-              @click="filterGrammar('type', type)"
-            >
-              {{ type }}
-            </button>
-          </div>
-        </div>
       </div>
 
-      <div class="grammar-grid">
+      <div v-if="loading && !grammarPoints.length" class="loading-state">
+        <el-skeleton :rows="4" animated />
+      </div>
+
+      <div v-else-if="error" class="error-state">
+        <i class="ri-error-warning-line"></i>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" @click="fetchGrammar">重试</button>
+      </div>
+
+      <div v-else class="grammar-grid">
         <div 
-          v-for="point in filteredGrammarPoints" 
-          :key="point.id" 
+          v-for="point in grammarPoints" 
+          :key="point.grammarId"
           class="grammar-card"
-          @click="navigateToDetail(point.id)"
         >
-          <div class="level-badge">{{ point.level }}</div>
-          <h3>{{ point.title }}</h3>
-          <p class="explanation">{{ point.explanation }}</p>
+          <div class="level-badge">{{ point.jlptLevel }}</div>
+          <h3>{{ point.grammarName }}</h3>
+          <p class="explanation">{{ point.grammarMeaning }}</p>
           
           <div class="usage-list">
-            <div class="usage-item" v-for="(usage, index) in point.usage" :key="index">
-              {{ usage }}
+            <div class="usage-item" v-if="point.exampleSentence1">
+              {{ point.exampleSentence1 }}
+              <div class="example-meaning">{{ point.exampleTranslation1 }}</div>
+            </div>
+            <div class="usage-item" v-if="point.exampleSentence2">
+              {{ point.exampleSentence2 }}
+              <div class="example-meaning">{{ point.exampleTranslation2 }}</div>
+            </div>
+            <div class="usage-item" v-if="point.exampleSentence3">
+              {{ point.exampleSentence3 }}
+              <div class="example-meaning">{{ point.exampleTranslation3 }}</div>
             </div>
           </div>
           
-          <button class="btn-detail">
+          <button class="btn-detail" @click="navigateToDetail(point.grammarId)">
             查看详情
             <i class="ri-arrow-right-line"></i>
           </button>
         </div>
+      </div>
+
+      <div class="load-more" v-if="grammarPoints.length > 0">
+        <button 
+          class="btn btn-primary" 
+          @click="loadMore"
+          :disabled="loading"
+        >
+          {{ loading ? '加载中...' : '再来一组语法' }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const currentLevel = ref('全部')
-const currentType = ref('全部')
 
-const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
-const types = ['全部', '助词', '时态', '敬语', '条件', '被动', '使役', '授受']
+// API配置
+const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
+const DEFAULT_CONFIG = {
+  userId: '20250309125643',
+  token: '639786d8b059808e0ff6a66aaba80adb',
+  user_phone: '8615998658809',
+  loginType: 0,
+  useType: 2,
+  userTypeUseGrammarId: 2025000241
+}
 
 interface GrammarPoint {
-  id: string
-  title: string
-  level: string
-  type: string
-  explanation: string
-  usage: string[]
+  grammarId: number
+  grammarName: string
+  grammarForm: string
+  grammarMeaning: string
+  exampleSentence1: string
+  exampleTranslation1: string
+  exampleSentence2: string
+  exampleTranslation2: string
+  exampleSentence3: string
+  exampleTranslation3: string
+  jlptLevel: string
 }
 
-const grammarPoints = ref<GrammarPoint[]>([
-  {
-    id: 'n3-001',
-    title: '〜ようになる',
-    level: 'N3',
-    type: '时态',
-    explanation: '表示状态或能力的变化。用于描述从"不能做"到"能做"的变化，或是新习惯的养成。',
-    usage: [
-      '動詞（辞書形）+ ようになる',
-      '動詞（ない形）+ ようになる',
-      'イ形容詞 + ようになる',
-      'ナ形容詞/名詞 + になる'
-    ]
-  },
-  {
-    id: 'n3-002',
-    title: '〜てしまう',
-    level: 'N3',
-    type: '时态',
-    explanation: '表示动作的完成，有时带有遗憾或后悔的语气。也可以表示某事的彻底完成。',
-    usage: [
-      '動詞（て形）+ しまう',
-      '動詞（て形）+ ちゃう（口語）',
-      '動詞（て形）+ じゃう（口語）'
-    ]
-  },
-  {
-    id: 'n4-001',
-    title: '〜ている',
-    level: 'N4',
-    type: '时态',
-    explanation: '表示动作的进行或状态的持续。',
-    usage: [
-      '動詞（て形）+ いる',
-      '動詞（て形）+ います（敬体）'
-    ]
-  },
-  {
-    id: 'n5-001',
-    title: 'は vs が',
-    level: 'N5',
-    type: '助词',
-    explanation: '区分主题和主语的使用。は用于引出话题，が用于强调或指明主语。',
-    usage: [
-      '名詞 + は',
-      '名詞 + が'
-    ]
-  }
-])
+const currentLevel = ref('全部')
+const grammarPoints = ref<GrammarPoint[]>([])
+const loading = ref(false)
+const error = ref('')
 
-const filterGrammar = (filterType: string, value: string) => {
-  if (filterType === 'level') {
-    currentLevel.value = value
-  } else if (filterType === 'type') {
-    currentType.value = value
+const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
+
+const setLevel = (level: string) => {
+  currentLevel.value = level
+  grammarPoints.value = []
+  fetchGrammar()
+}
+
+const fetchGrammar = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const response = await axios.post(API_URL, {
+      ...DEFAULT_CONFIG,
+      jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
+      grammarCount: 2
+    })
+
+    if (response.data.code === 200) {
+      grammarPoints.value = response.data.data
+    } else {
+      throw new Error(response.data.msg || '获取语法失败')
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '获取语法失败，请稍后重试'
+    ElMessage.error(error.value)
+  } finally {
+    loading.value = false
   }
 }
 
-const filteredGrammarPoints = computed(() => {
-  let filtered = grammarPoints.value
+const loadMore = () => {
+  fetchGrammar()
+}
 
-  // 应用等级筛选
-  if (currentLevel.value !== '全部') {
-    filtered = filtered.filter(point => point.level === currentLevel.value)
-  }
-
-  // 应用类型筛选
-  if (currentType.value !== '全部') {
-    filtered = filtered.filter(point => point.type === currentType.value)
-  }
-
-  return filtered
-})
-
-const navigateToDetail = (grammarId: string) => {
+const navigateToDetail = (grammarId: number) => {
   router.push(`/grammar/${grammarId}`)
 }
+
+onMounted(() => {
+  fetchGrammar()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -299,6 +297,14 @@ h3 {
   margin-bottom: var(--spacing-xs);
   font-family: monospace;
   font-size: 0.95rem;
+
+  .example-meaning {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-color);
+  }
 }
 
 .btn-detail {
@@ -318,6 +324,42 @@ h3 {
 
   i {
     transition: transform var(--transition-fast);
+  }
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.error-state {
+  i {
+    font-size: 3rem;
+    color: var(--error-color);
+    margin-bottom: var(--spacing-md);
+  }
+
+  p {
+    color: var(--text-light);
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+.load-more {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+
+  button {
+    padding: 12px 30px;
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
   }
 }
 </style>
