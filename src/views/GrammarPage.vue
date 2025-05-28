@@ -104,8 +104,8 @@ const getConfig = () => {
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
-    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
-    grammarCount: 6
+    grammarCount: 6,
+    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value
   }
 }
 
