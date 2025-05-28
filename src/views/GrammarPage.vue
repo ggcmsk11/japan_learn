@@ -82,7 +82,7 @@ const getConfig = () => {
     userId: authStore.userInfo?.userId || '',
     token: authStore.token || '',
     user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-    loginType: 0,
+    loginType: 2,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
     jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
