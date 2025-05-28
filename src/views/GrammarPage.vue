@@ -133,7 +133,7 @@ const fetchGrammar = async () => {
     const response = await axios.post(API_URL, {
       ...DEFAULT_CONFIG,
       jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
-      grammarCount: 2
+      grammarCount: 10
     })
 
     if (response.data.code === 200) {
