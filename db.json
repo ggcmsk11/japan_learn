@@ -63,81 +63,34 @@
   ],
   "examQuestions": [
     {
-      "id": "jlpt-n3-2022",
-      "title": "JLPT N3 模擬試験 2022年",
+      "id": "jlpt-n3-reading-2024",
+      "title": "JLPT N3 阅读练习 2024年",
       "level": "N3",
-      "year": "2022",
-      "timeLimit": 120,
+      "type": "reading",
+      "year": "2024",
+      "timeLimit": 90,
       "sections": [
         {
-          "id": "vocabulary",
-          "title": "語彙",
+          "id": "reading-1",
+          "title": "短文阅读",
           "questions": [
             {
-              "id": "vocab-1",
-              "text": "彼女は（　　）話し方をするので、私には理解できないことがある。",
-              "options": ["ぼんやりした", "はっきりした", "めずらしい", "すばらしい"],
-              "correctAnswer": 0,
-              "explanation": "「ぼんやりした」表示「模糊的，不清楚的」，符合句意"她说话方式模糊，所以我有时听不懂"。"
-            },
-            {
-              "id": "vocab-2",
-              "text": "先週のテストは（　　）でした。今週のテストは簡単だと思います。",
-              "options": ["親切", "便利", "大切", "難しい"],
-              "correctAnswer": 3,
-              "explanation": "「難しい」表示「困难的」，符合句意"上周的考试很难。我认为这周的考试会简单"。"
-            },
-            {
-              "id": "vocab-3",
-              "text": "その映画はとても（　　）があり、私は何度も見ました。",
-              "options": ["意見", "才能", "自由", "魅力"],
-              "correctAnswer": 3,
-              "explanation": "「魅力」表示「吸引力，魅力」，符合句意"那部电影很有魅力，我看了好几次"。"
-            }
-          ]
-        },
-        {
-          "id": "grammar",
-          "title": "文法",
-          "questions": [
-            {
-              "id": "grammar-1",
-              "text": "この仕事は来週（　　）終わらせなければなりません。",
-              "options": ["まで", "までに", "から", "からに"],
-              "correctAnswer": 1,
-              "explanation": "「までに」表示「到...为止」，用于表示截止期限，符合句意"这项工作必须在下周之前完成"。"
-            },
-            {
-              "id": "grammar-2",
-              "text": "彼は急いでいた（　　）、レポートを提出し忘れました。",
-              "options": ["ために", "ように", "ことに", "あまり"],
-              "correctAnswer": 0,
-              "explanation": "「ために」在这里表示原因，符合句意"因为他太匆忙，所以忘记提交报告"。"
-            },
-            {
-              "id": "grammar-3",
-              "text": "あの店は値段が高い（　　）、品質もいいです。",
-              "options": ["だけ", "ばかり", "ほど", "だけど"],
-              "correctAnswer": 3,
-              "explanation": "「だけど」表示转折关系，符合句意"那家店虽然价格高，但质量也好"。"
-            }
-          ]
-        },
-        {
-          "id": "reading",
-          "title": "読解",
-          "questions": [
-            {
-              "id": "reading-1",
+              "id": "reading-1-1",
               "text": "私の趣味は読書です。休みの日には、よく図書館に行きます。先週の日曜日も図書館で本を読んでいました。その時、高校時代の友達に会いました。彼女も私と同じように、本を読むのが好きです。私たちは一緒にコーヒーを飲みながら、いろいろな話をしました。とても楽しい一日でした。",
               "question": "作者在图书馆遇到了谁？",
               "options": ["大学同学", "高中同学", "小学同学", "初中同学"],
               "correctAnswer": 1,
               "explanation": "文中提到"高校時代の友達に会いました"，表示遇到了高中同学。"
-            },
+            }
+          ]
+        },
+        {
+          "id": "reading-2",
+          "title": "广告阅读",
+          "questions": [
             {
-              "id": "reading-2",
-              "text": "【新商品のお知らせ】明日から、新しい日本語教材「みんなの日本語」が発売されます。初級から上級まで、レベルに合わせて学習できます。発売記念として、明日から一週間、20%割引でご提供いたします。ぜひ、この機会にお買い求めください。",
+              "id": "reading-2-1",
+              "text": "【新商品のお知らせ】\n明日から、新しい日本語教材「みんなの日本語」が発売されます。初級から上級まで、レベルに合わせて学習できます。発売記念として、明日から一週間、20%割引でご提供いたします。ぜひ、この機会にお買い求めください。",
               "question": "这个广告的主要内容是什么？",
               "options": ["新店铺开业通知", "新教材发售通知", "招聘通知", "休业通知"],
               "correctAnswer": 1,
@@ -146,77 +99,54 @@
           ]
         },
         {
-          "id": "listening",
-          "title": "聴解",
+          "id": "reading-3",
+          "title": "邮件阅读",
           "questions": [
             {
-              "id": "listening-1",
-              "audioUrl": "https://example.com/audio1.mp3",
-              "text": "男子最后决定做什么？",
-              "options": ["去超市", "去图书馆", "回家", "去咖啡店"],
-              "correctAnswer": 1,
-              "explanation": "对话中男子最后决定去图书馆学习。"
-            },
-            {
-              "id": "listening-2",
-              "audioUrl": "https://example.com/audio2.mp3",
-              "text": "图书馆明天什么时候开门？",
-              "options": ["8:00", "9:00", "10:00", "11:00"],
-              "correctAnswer": 1,
-              "explanation": "通知中提到图书馆明天早上9点开门。"
+              "id": "reading-3-1",
+              "text": "田中様\n\nお世話になっております。\n来週の会議の件について、ご連絡いたします。\n予定していた14日（火）から15日（水）に変更となりました。\nご確認のほど、よろしくお願いいたします。\n\n鈴木",
+              "question": "会议改到什么时候举行？",
+              "options": ["周一", "周二", "周三", "周四"],
+              "correctAnswer": 2,
+              "explanation": "邮件中提到会议从14日（周二）改到了15日（周三）。"
             }
           ]
         }
       ]
     },
     {
-      "id": "jlpt-n4-2022",
-      "title": "JLPT N4 模擬試験 2022年",
+      "id": "jlpt-n4-reading-2024",
+      "title": "JLPT N4 阅读练习 2024年",
       "level": "N4",
-      "year": "2022",
-      "timeLimit": 120,
+      "type": "reading",
+      "year": "2024",
+      "timeLimit": 90,
       "sections": [
         {
-          "id": "reading",
-          "title": "読解",
+          "id": "reading-1",
+          "title": "短文阅读",
           "questions": [
             {
-              "id": "reading-1",
+              "id": "reading-1-1",
               "text": "私は毎朝6時に起きます。朝ご飯を食べてから、会社に行きます。電車で30分かかります。会社は9時から5時までです。仕事が終わってから、よくジムに行きます。運動は健康にいいと思います。",
               "question": "作者每天早上几点起床？",
               "options": ["5点", "6点", "7点", "8点"],
               "correctAnswer": 1,
               "explanation": "文章开头提到"私は毎朝6時に起きます"，表示每天早上6点起床。"
-            },
+            }
+          ]
+        },
+        {
+          "id": "reading-2",
+          "title": "通知阅读",
+          "questions": [
             {
-              "id": "reading-2",
+              "id": "reading-2-1",
               "text": "来週の土曜日、私の誕生日パーティーをします。場所は私の家です。時間は午後2時からです。友達が10人来ます。みんなでケーキを食べて、ゲームをする予定です。とても楽しみです。",
               "question": "生日派对什么时候开始？",
               "options": ["上午10点", "中午12点", "下午2点", "下午4点"],
               "correctAnswer": 2,
               "explanation": "文中提到"時間は午後2時からです"，表示派对从下午2点开始。"
-            }
-          ]
-        },
-        {
-          "id": "listening",
-          "title": "聴解",
-          "questions": [
-            {
-              "id": "listening-1",
-              "audioUrl": "https://example.com/audio3.mp3",
-              "text": "女子想买什么？",
-              "options": ["面包", "蛋糕", "饮料", "水果"],
-              "correctAnswer": 1,
-              "explanation": "对话中女子说要买蛋糕。"
-            },
-            {
-              "id": "listening-2",
-              "audioUrl": "https://example.com/audio4.mp3",
-              "text": "餐厅几点开始营业？",
-              "options": ["10:00", "11:00", "12:00", "13:00"],
-              "correctAnswer": 1,
-              "explanation": "通知中提到餐厅从11点开始营业。"
             }
           ]
         }
