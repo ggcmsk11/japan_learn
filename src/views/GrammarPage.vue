@@ -93,14 +93,21 @@ const authStore = useAuthStore()
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
 
 // Get dynamic user data from auth store
-const getConfig = () => ({
-  userId: '20250309125643',
-  token: '639786d8b059808e0ff6a66aaba80adb',
-  user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '', // Remove '+' prefix if exists
-  loginType: 0,
-  useType: 2,
-  userTypeUseGrammarId: 2025000241
-})
+const getConfig = () => {
+  if (!authStore.userInfo) {
+    router.push('/auth/login')
+    throw new Error('请先登录')
+  }
+  
+  return {
+    userId: authStore.userInfo.userId,
+    token: authStore.token,
+    user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
+    loginType: 0,
+    useType: 2,
+    userTypeUseGrammarId: 2025000241
+  }
+}
 
 interface GrammarPoint {
   grammarId: number
@@ -134,8 +141,9 @@ const fetchGrammar = async () => {
   error.value = ''
 
   try {
+    const config = getConfig()
     const response = await axios.post(API_URL, {
-      ...getConfig(),
+      ...config,
       jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
       grammarCount: 1
     })
