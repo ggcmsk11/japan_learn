@@ -161,7 +161,6 @@ const selectAreaCode = (code: string) => {
 const handleLogin = async () => {
   try {
     isSubmitting.value = true
-    
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
     const phoneNumber = areaCode.value + loginForm.value.phone
@@ -206,9 +205,8 @@ const handleLogin = async () => {
       duration: 1000
     })
     
-    // Redirect after successful login
-    const redirect = route.query.redirect as string
-    router.push(redirect || '/profile')
+    // Redirect to home page after successful login
+    router.push('/')
     
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
