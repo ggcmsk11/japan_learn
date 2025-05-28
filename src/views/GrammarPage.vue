@@ -103,11 +103,10 @@ const getConfig = () => {
     userId: authStore.userInfo.userId,
     token: authStore.token,
     user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-    jpltLevel: N1,
-    grammarCount: 2 ,
     loginType: 0,
     useType: 2,
-    userTypeUseGrammarId: 2025000241
+    userTypeUseGrammarId: 2025000241,
+    grammarCount: 6
   }
 }
 
@@ -146,8 +145,7 @@ const fetchGrammar = async () => {
     const config = getConfig()
     const response = await axios.post(API_URL, {
       ...config,
-      jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
-      grammarCount: 1
+      jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value
     })
 
     if (response.data.code === 200) {
