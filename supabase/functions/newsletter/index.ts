@@ -1,42 +1,8 @@
-import { SmtpClient } from "npm:smtp@0.1.4"
+import { createClient } from 'npm:@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-async function sendEmail(email: string) {
-  const client = new SmtpClient()
-
-  await client.connectTLS({
-    hostname: "smtp.gmail.com",
-    port: 465,
-    username: Deno.env.get('SMTP_USERNAME'),
-    password: Deno.env.get('SMTP_PASSWORD'),
-  })
-
-  await client.send({
-    from: "no-reply@chunshuariyu.com",
-    to: email,
-    subject: "感谢订阅纯刷日语",
-    content: `
-      感谢您订阅纯刷日语！
-      
-      我们会定期为您发送优质的日语学习资讯和独家内容。
-      
-      如果您想要取消订阅，请联系我们的客服。
-      
-      祝您学习愉快！
-      纯刷日语团队
-    `,
-  })
-
-  await client.close()
-}
-
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
 }
 
 Deno.serve(async (req) => {
@@ -51,17 +17,29 @@ Deno.serve(async (req) => {
       throw new Error('请输入邮箱地址')
     }
 
-    if (!validateEmail(email)) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
       throw new Error('邮箱格式不正确')
     }
 
-    // Send welcome email
-    await sendEmail(email)
+    // Initialize Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Insert subscription
+    const { error } = await supabaseClient
+      .from('subscriptions')
+      .insert([{ email }])
+
+    if (error) throw error
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: '订阅成功！我们已向您发送了一封欢迎邮件。'
+        message: '订阅成功！感谢您的订阅。' 
       }),
       { 
         headers: {
