@@ -161,11 +161,8 @@ const navigateToDetail = (grammar: GrammarPoint) => {
     return
   }
   
-  // Create a plain JavaScript object from the grammar object
-  const plainGrammar = { ...grammar }
-  
-  // Save plain grammar data to history state
-  history.pushState({ grammar: plainGrammar }, '', `/grammar/${grammar.grammarId}`)
+  // Store grammar data in sessionStorage instead of history state
+  sessionStorage.setItem('currentGrammar', JSON.stringify(grammar))
   router.push(`/grammar/${grammar.grammarId}`)
 }
 

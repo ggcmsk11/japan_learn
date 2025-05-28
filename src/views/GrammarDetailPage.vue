@@ -88,12 +88,12 @@ onMounted(() => {
     return
   }
 
-  // Get grammar data from router state
-  const state = history.state?.grammar
-  if (state) {
-    grammar.value = state
+  // Get grammar data from sessionStorage
+  const storedGrammar = sessionStorage.getItem('currentGrammar')
+  if (storedGrammar) {
+    grammar.value = JSON.parse(storedGrammar)
   } else {
-    // If no data in state, go back to grammar list
+    // If no data in sessionStorage, go back to grammar list
     router.push('/grammar')
   }
 })
