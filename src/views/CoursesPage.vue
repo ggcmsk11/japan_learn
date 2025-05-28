@@ -102,112 +102,102 @@
       </div>
 
       <div class="pagination">
-        <button class="page-btn prev">
+        <button class="page-btn prev" :disabled="currentPage === 1" @click="prevPage">
           <i class="ri-arrow-left-s-line"></i>
           上一页
         </button>
         <div class="page-numbers">
-          <button class="page-number active">1</button>
-          <button class="page-number">2</button>
-          <button class="page-number">3</button>
-          <span class="page-dots">...</span>
-          <button class="page-number">8</button>
+          <button 
+            v-for="pageNum in displayedPages" 
+            :key="pageNum"
+            :class="['page-number', { active: currentPage === pageNum }]"
+            @click="currentPage = pageNum"
+          >
+            {{ pageNum }}
+          </button>
+          <span v-if="showEllipsis" class="page-dots">...</span>
+          <button 
+            v-if="showLastPage"
+            :class="['page-number', { active: currentPage === totalPages }]"
+            @click="currentPage = totalPages"
+          >
+            {{ totalPages }}
+          </button>
         </div>
-        <button class="page-btn next">
+        <button class="page-btn next" :disabled="currentPage === totalPages" @click="nextPage">
           下一页
           <i class="ri-arrow-right-s-line"></i>
         </button>
       </div>
     </div>
 
-    <!-- 报名弹窗 -->
-    <div v-if="showEnrollModal" class="enroll-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>课程报名</h3>
-          <button class="btn-close" @click="showEnrollModal = false">
-            <i class="ri-close-line"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <img src="https://images.pexels.com/photos/8737558/pexels-photo-8737558.jpeg?auto=compress&cs=tinysrgb&w=300" alt="微信二维码" class="qr-image">
-          <p>扫描二维码添加老师微信，完成报名</p>
-        </div>
+    <!-- Enroll Dialog -->
+    <el-dialog
+      v-model="showEnrollModal"
+      title="课程报名"
+      width="360px"
+      center
+      :show-close="false"
+      class="enroll-dialog"
+    >
+      <div class="qr-container">
+        <img src="https://images.pexels.com/photos/8737558/pexels-photo-8737558.jpeg?auto=compress&cs=tinysrgb&w=300" alt="客服二维码" class="qr-code">
+        <p>扫码添加客服微信，完成报名</p>
       </div>
-      <div class="modal-backdrop" @click="showEnrollModal = false"></div>
-    </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showEnrollModal = false">取消</el-button>
+          <el-button type="primary" @click="downloadApp">
+            下载APP
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- Download Dialog -->
+    <el-dialog
+      v-model="showDownloadDialog"
+      title="下载纯刷日语APP"
+      width="360px"
+      center
+      :show-close="false"
+      class="download-dialog"
+    >
+      <div class="download-options">
+        <a href="/downloads/chunshua.apk" class="download-btn android">
+          <i class="ri-android-line"></i>
+          Android版下载
+        </a>
+        <a href="https://apps.apple.com/app/chunshua" target="_blank" class="download-btn ios">
+          <i class="ri-apple-line"></i>
+          iOS版下载
+        </a>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showDownloadDialog = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { courses } from '../config/courses'
 
-const showEnrollModal = ref(false)
+const router = useRouter()
 const currentLevel = ref('全部')
 const currentType = ref('全部')
 const currentSort = ref('popular')
+const currentPage = ref(1)
+const itemsPerPage = 6
+const showEnrollModal = ref(false)
+const showDownloadDialog = ref(false)
 
 const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
 const types = ['全部', '语法', '会话', '阅读', '听力']
-
-interface Course {
-  id: string
-  title: string
-  description: string
-  level: string
-  type: string
-  image: string
-  lessons: number
-  duration: string
-  rating: number
-  students: number
-  price: number
-  tag?: string
-}
-
-const courses = ref<Course[]>([
-  {
-    id: 'n5-grammar',
-    title: 'JLPT N5 语法精讲',
-    description: '系统掌握N5级语法知识，打好基础',
-    level: 'N5',
-    type: '语法',
-    image: 'https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 20,
-    duration: '10周',
-    rating: 4.8,
-    students: 1250,
-    price: 9800,
-    tag: 'popular'
-  },
-  {
-    id: 'n4-listening',
-    title: 'JLPT N4 听力强化',
-    description: '提高听力理解能力，备战N4考试',
-    level: 'N4',
-    type: '听力',
-    image: 'https://images.pexels.com/photos/5428003/pexels-photo-5428003.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 15,
-    duration: '8周',
-    rating: 4.7,
-    students: 980,
-    price: 8800
-  },
-  {
-    id: 'n3-reading',
-    title: 'JLPT N3 阅读技巧',
-    description: '掌握文章要点，提高阅读速度',
-    level: 'N3',
-    type: '阅读',
-    image: 'https://images.pexels.com/photos/5490276/pexels-photo-5490276.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 25,
-    duration: '12周',
-    rating: 4.9,
-    students: 760,
-    price: 12800,
-    tag: 'new'
-  }
-])
 
 const filterCourses = (filterType: string, value: string) => {
   if (filterType === 'level') {
@@ -215,40 +205,88 @@ const filterCourses = (filterType: string, value: string) => {
   } else if (filterType === 'type') {
     currentType.value = value
   }
+  currentPage.value = 1
 }
 
-const filteredAndSortedCourses = computed(() => {
-  let filtered = courses.value
+const filteredCourses = computed(() => {
+  let filtered = courses
 
-  // 应用等级筛选
   if (currentLevel.value !== '全部') {
     filtered = filtered.filter(course => course.level === currentLevel.value)
   }
 
-  // 应用类型筛选
   if (currentType.value !== '全部') {
     filtered = filtered.filter(course => course.type === currentType.value)
   }
 
-  // 应用排序
-  return filtered.sort((a, b) => {
-    switch (currentSort.value) {
-      case 'popular':
-        return b.students - a.students
-      case 'new':
-        return b.id.localeCompare(a.id)
-      case 'price-low':
-        return a.price - b.price
-      case 'price-high':
-        return b.price - a.price
-      default:
-        return 0
-    }
-  })
+  return filtered
 })
 
-const sortCourses = () => {
-  // 排序逻辑已经在 computed 属性中处理
+const filteredAndSortedCourses = computed(() => {
+  let sorted = [...filteredCourses.value]
+
+  switch (currentSort.value) {
+    case 'popular':
+      sorted.sort((a, b) => b.students - a.students)
+      break
+    case 'new':
+      sorted.sort((a, b) => (b.tag === 'new' ? 1 : 0) - (a.tag === 'new' ? 1 : 0))
+      break
+    case 'price-low':
+      sorted.sort((a, b) => a.price - b.price)
+      break
+    case 'price-high':
+      sorted.sort((a, b) => b.price - a.price)
+      break
+  }
+
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return sorted.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(filteredCourses.value.length / itemsPerPage))
+
+const displayedPages = computed(() => {
+  const pages = []
+  const maxVisiblePages = 5
+  let start = Math.max(1, currentPage.value - 2)
+  let end = Math.min(start + maxVisiblePages - 1, totalPages.value)
+
+  if (end - start + 1 < maxVisiblePages) {
+    start = Math.max(1, end - maxVisiblePages + 1)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+const showEllipsis = computed(() => {
+  return totalPages.value > displayedPages.value[displayedPages.value.length - 1] + 1
+})
+
+const showLastPage = computed(() => {
+  return totalPages.value > displayedPages.value[displayedPages.value.length - 1]
+})
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const downloadApp = () => {
+  showEnrollModal.value = false
+  showDownloadDialog.value = true
 }
 </script>
 
@@ -526,9 +564,14 @@ const sortCourses = () => {
   cursor: pointer;
   transition: all var(--transition-fast);
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--primary-color);
     color: var(--primary-color);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   &.prev i {
@@ -558,7 +601,7 @@ const sortCourses = () => {
   cursor: pointer;
   transition: all var(--transition-fast);
 
-  &:hover {
+  &:hover:not(.active) {
     border-color: var(--primary-color);
     color: var(--primary-color);
   }
@@ -574,82 +617,68 @@ const sortCourses = () => {
   color: var(--text-light);
 }
 
-// 报名弹窗样式
-.enroll-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-
-  .modal-content {
-    background: white;
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-    z-index: 1001;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .modal-header {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h3 {
-      font-size: 1.2rem;
-      margin: 0;
-    }
-
-    .btn-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0;
-      color: var(--text-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color var(--transition-fast);
-
-      &:hover {
-        color: var(--text-color);
-      }
-    }
-  }
-
-  .modal-body {
-    padding: var(--spacing-xl);
+.enroll-dialog,
+.download-dialog {
+  :deep(.el-dialog__header) {
+    margin-right: 0;
     text-align: center;
+  }
 
-    .qr-image {
+  .qr-container {
+    text-align: center;
+    padding: var(--spacing-md) 0;
+
+    .qr-code {
       width: 200px;
       height: 200px;
       margin-bottom: var(--spacing-md);
     }
 
     p {
-      color: var(--text-light);
-      margin: 0;
+      color: var(--text-color);
     }
   }
 
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+  .download-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
   }
+
+  .download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: opacity var(--transition-fast);
+
+    &:hover {
+      opacity: 0.9;
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+
+    &.android {
+      background-color: #3DDC84;
+    }
+
+    &.ios {
+      background-color: #000000;
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
 }
 </style>

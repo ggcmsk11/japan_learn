@@ -2,6 +2,7 @@ export interface Course {
   id: string
   title: string
   level: string
+  type: string
   image: string
   lessons: number
   duration: string
@@ -14,9 +15,10 @@ export interface Course {
 
 export const courses: Course[] = [
   {
-    id: 'n5-beginner',
-    title: 'JLPT N5 初级课程',
+    id: 'n5-grammar',
+    title: 'JLPT N5 语法精讲',
     level: 'N5',
+    type: '语法',
     image: 'https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=600',
     lessons: 20,
     duration: '10周',
@@ -24,43 +26,33 @@ export const courses: Course[] = [
     students: 1250,
     price: 9800,
     tag: 'popular',
-    description: '从零开始学习日语，掌握基础词汇和语法。'
+    description: '系统掌握N5级语法知识，打好基础'
   },
   {
-    id: 'n4-elementary',
-    title: 'JLPT N4 基础课程',
+    id: 'n4-listening',
+    title: 'JLPT N4 听力强化',
     level: 'N4',
+    type: '听力',
     image: 'https://images.pexels.com/photos/5428003/pexels-photo-5428003.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 25,
-    duration: '12周',
+    lessons: 15,
+    duration: '8周',
     rating: 4.7,
     students: 980,
-    price: 12800,
-    description: '进一步提升日语水平，加强听说读写能力。'
+    price: 8800,
+    description: '提高听力理解能力，备战N4考试'
   },
   {
-    id: 'n3-intermediate',
-    title: 'JLPT N3 中级课程',
+    id: 'n3-reading',
+    title: 'JLPT N3 阅读技巧',
     level: 'N3',
+    type: '阅读',
     image: 'https://images.pexels.com/photos/5490276/pexels-photo-5490276.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 30,
-    duration: '15周',
+    lessons: 25,
+    duration: '12周',
     rating: 4.9,
     students: 760,
-    price: 14800,
-    tag: 'new',
-    description: '掌握中级日语，提高实际应用能力。'
-  },
-  {
-    id: 'n100-elementary',
-    title: 'JLPT N4 基础课程',
-    level: 'N4',
-    image: 'https://images.pexels.com/photos/5428003/pexels-photo-5428003.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 25,
-    duration: '12周',
-    rating: 4.7,
-    students: 980,
     price: 12800,
-    description: '进一步提升日语水平，加强听说读写能力。'
-  },
+    tag: 'new',
+    description: '掌握文章要点，提高阅读速度'
+  }
 ]
