@@ -164,7 +164,6 @@ const handleLogin = async () => {
     
     const pwKey = "chunshualiguan"
     const encryptedPassword = md5(loginForm.value.password + pwKey)
-    
     const phoneNumber = areaCode.value + loginForm.value.phone
     
     const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
@@ -191,6 +190,15 @@ const handleLogin = async () => {
     // Store user info in store
     authStore.login(data.data.token, data.data, phoneNumber)
     
+    // Store login state if remember is checked
+    if (loginForm.value.remember) {
+      localStorage.setItem('loginState', JSON.stringify({
+        token: data.data.token,
+        userInfo: data.data,
+        phoneNumber: phoneNumber
+      }))
+    }
+
     // Show success message for 3 seconds
     ElMessage({
       message: '登录成功',
