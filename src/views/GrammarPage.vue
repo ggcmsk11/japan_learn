@@ -84,19 +84,23 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // API配置
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
-const DEFAULT_CONFIG = {
+
+// Get dynamic user data from auth store
+const getConfig = () => ({
   userId: '20250309125643',
   token: '639786d8b059808e0ff6a66aaba80adb',
-  user_phone: '8615998658809',
+  user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '', // Remove '+' prefix if exists
   loginType: 0,
   useType: 2,
   userTypeUseGrammarId: 2025000241
-}
+})
 
 interface GrammarPoint {
   grammarId: number
@@ -131,9 +135,9 @@ const fetchGrammar = async () => {
 
   try {
     const response = await axios.post(API_URL, {
-      ...DEFAULT_CONFIG,
+      ...getConfig(),
       jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
-      grammarCount: 1 // Changed to 1 to only fetch one grammar point initially
+      grammarCount: 1
     })
 
     if (response.data.code === 200) {
