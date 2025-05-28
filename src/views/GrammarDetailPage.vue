@@ -52,8 +52,10 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const grammarId = route.params.id
 
 interface Grammar {
@@ -75,12 +77,12 @@ const grammar = ref<Grammar | null>(null)
 const fetchGrammarDetail = async () => {
   try {
     const response = await axios.post('https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards', {
-userId: authStore.userInfo.userId,
-    token: authStore.token,
-    user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-    loginType: 0,
-    useType: 2,
-    userTypeUseGrammarId: 2025000241
+      userId: authStore.userInfo?.userId,
+      token: authStore.token,
+      user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
+      loginType: 0,
+      useType: 2,
+      userTypeUseGrammarId: 2025000241
     })
 
     if (response.data.code === 200 && response.data.data.length > 0) {
@@ -145,4 +147,40 @@ section {
   h3 {
     font-size: 1.3rem;
     margin-bottom: var(--spacing-lg);
-    color: var(--primary
+    color: var(--primary-color);
+  }
+}
+
+.usage-list {
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+}
+
+.usage-item {
+  font-family: monospace;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.example-cards {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.example-card {
+  background-color: var(--background-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--primary-color);
+
+  .example-japanese {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .example-chinese {
+    color: var(--text-light);
+  }
+}
+</style>
