@@ -1,47 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { courses } from '../../config/courses'
 
 const router = useRouter()
 const activeFilter = ref('all')
-
-const courses = ref([
-  {
-    id: 'n5-beginner',
-    title: 'JLPT N5 初级课程',
-    level: 'N5',
-    image: 'https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 20,
-    duration: '10周',
-    rating: 4.8,
-    students: 1250,
-    price: 9800,
-    tag: 'popular'
-  },
-  {
-    id: 'n4-elementary',
-    title: 'JLPT N4 基础课程',
-    level: 'N4',
-    image: 'https://images.pexels.com/photos/5428003/pexels-photo-5428003.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 25,
-    duration: '12周',
-    rating: 4.7,
-    students: 980,
-    price: 12800,
-  },
-  {
-    id: 'n3-intermediate',
-    title: 'JLPT N3 中级课程',
-    level: 'N3',
-    image: 'https://images.pexels.com/photos/5490276/pexels-photo-5490276.jpeg?auto=compress&cs=tinysrgb&w=600',
-    lessons: 30,
-    duration: '15周',
-    rating: 4.9,
-    students: 760,
-    price: 14800,
-    tag: 'new'
-  }
-])
 
 const filters = [
   { id: 'all', label: '全部' },
@@ -54,9 +17,9 @@ const filters = [
 
 const filteredCourses = computed(() => {
   if (activeFilter.value === 'all') {
-    return courses.value
+    return courses
   }
-  return courses.value.filter(course => course.level === activeFilter.value)
+  return courses.filter(course => course.level === activeFilter.value)
 })
 
 const setFilter = (filter: string) => {
@@ -102,6 +65,7 @@ const navigateToCourse = (courseId: string) => {
           
           <div class="course-content">
             <h3 class="course-title">{{ course.title }}</h3>
+            <p class="course-description">{{ course.description }}</p>
             
             <div class="course-details">
               <div class="detail-item">
@@ -124,9 +88,7 @@ const navigateToCourse = (courseId: string) => {
             </div>
             
             <div class="course-footer">
-              <div class="course-price">
-                ¥{{ course.price.toLocaleString() }}
-              </div>
+              <div class="course-price">¥{{ course.price.toLocaleString() }}</div>
               <button class="btn-course-details">
                 课程详情
                 <i class="ri-arrow-right-line"></i>
