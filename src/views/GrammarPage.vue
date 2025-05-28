@@ -78,6 +78,10 @@ const authStore = useAuthStore()
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
 
 const getConfig = () => {
+  // When level is '全部', send 'N' as jpltLevel
+  // Otherwise, send the actual level (N1, N2, etc.)
+  const jpltLevel = currentLevel.value === '全部' ? 'N' : currentLevel.value
+
   return {
     userId: authStore.userInfo?.userId || '',
     token: authStore.token || '',
@@ -85,7 +89,7 @@ const getConfig = () => {
     loginType: 0,
     useType: 2,
     userTypeUseGrammarId: 2025000241,
-    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
+    jpltLevel: jpltLevel,
     grammarCount: 6
   }
 }
