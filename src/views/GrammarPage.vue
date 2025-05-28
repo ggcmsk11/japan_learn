@@ -112,12 +112,21 @@ const error = ref('')
 const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
 
 const setLevel = (level: string) => {
+  if (!authStore.isLoggedIn) {
+    router.push('/auth/login')
+    return
+  }
   currentLevel.value = level
   grammarPoints.value = []
   fetchGrammar()
 }
 
 const fetchGrammar = async () => {
+  if (!authStore.isLoggedIn) {
+    router.push('/auth/login')
+    return
+  }
+
   loading.value = true
   error.value = ''
 
@@ -139,10 +148,18 @@ const fetchGrammar = async () => {
 }
 
 const loadMore = () => {
+  if (!authStore.isLoggedIn) {
+    router.push('/auth/login')
+    return
+  }
   fetchGrammar()
 }
 
 const navigateToDetail = (grammar: GrammarPoint) => {
+  if (!authStore.isLoggedIn) {
+    router.push('/auth/login')
+    return
+  }
   router.push({
     path: `/grammar/${grammar.grammarId}`,
     state: { grammar }
@@ -150,6 +167,10 @@ const navigateToDetail = (grammar: GrammarPoint) => {
 }
 
 onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    router.push('/auth/login')
+    return
+  }
   fetchGrammar()
 })
 
