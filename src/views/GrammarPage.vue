@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
@@ -160,10 +160,10 @@ const navigateToDetail = (grammar: GrammarPoint) => {
     router.push('/auth/login')
     return
   }
-  router.push({
-    path: `/grammar/${grammar.grammarId}`,
-    state: { grammar }
-  })
+  
+  // Save grammar data to history state
+  history.pushState({ grammar }, '', `/grammar/${grammar.grammarId}`)
+  router.push(`/grammar/${grammar.grammarId}`)
 }
 
 onMounted(() => {
@@ -173,9 +173,6 @@ onMounted(() => {
   }
   fetchGrammar()
 })
-
-// Provide grammar points to be used by detail page
-provide('grammarPoints', grammarPoints)
 </script>
 
 <style lang="scss" scoped>
