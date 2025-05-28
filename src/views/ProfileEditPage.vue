@@ -87,7 +87,7 @@ const handleSubmit = async () => {
         phoneNumber: authStore.phoneNumber?.replace(/^\+/, ''),
         userAccount: "1111",
         newPassword: encryptedPassword,
-        loginType: 0
+        loginType: 2
       })
     })
 
