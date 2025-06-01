@@ -39,24 +39,23 @@
       </div>
 
       <div class="practice-grid">
-        <div 
-          v-for="question in filteredQuestions" 
-          :key="question.questionBankId"
-          class="practice-card"
-          @click="startPractice(question)"
-        >
-          <div class="card-header">
-            <div class="level-badge">{{ question.jlptLevel }}</div>
-            <div class="type-badge">{{ question.tixing }}</div>
-          </div>
-          
-          <h3>{{ question.question }}</h3>
-          
-          <div class="card-footer">
-            <button class="btn-start">
-              开始练习
-              <i class="ri-arrow-right-line"></i>
-            </button>
+        <div v-for="type in filteredTypes" :key="type" class="question-type-group">
+          <h3 class="type-title">{{ type }}</h3>
+          <div class="questions-list">
+            <div 
+              v-for="question in getQuestionsByType(type)" 
+              :key="question.questionBankId"
+              class="question-card"
+              @click="startPractice(question)"
+            >
+              <div :class="['question-id', getLevelClass(question.jlptLevel)]">
+                {{ question.questionBankId }}
+              </div>
+              <div class="question-info">
+                <h4 class="question-title">{{ question.question }}</h4>
+                <p class="question-description">{{ getQuestionDescription(question) }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -118,7 +117,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { questionBanks, type QuestionBank } from '../config/questionBanks'
+import { questionBanks } from '../config/questionBanks'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -145,7 +144,37 @@ const filteredQuestions = computed(() => {
   return filtered
 })
 
-const startPractice = (question: QuestionBank) => {
+const filteredTypes = computed(() => {
+  const types = new Set(filteredQuestions.value.map(q => q.tixing))
+  return Array.from(types)
+})
+
+const getQuestionsByType = (type: string) => {
+  return filteredQuestions.value.filter(q => q.tixing === type)
+}
+
+const getLevelClass = (level: string) => {
+  return {
+    'level-n1': level === 'N1',
+    'level-n2': level === 'N2',
+    'level-n3': level === 'N3',
+    'level-n4': level === 'N4',
+    'level-n5': level === 'N5'
+  }
+}
+
+const getQuestionDescription = (question: any) => {
+  // Add descriptions based on question type and content
+  const descriptions: { [key: string]: string } = {
+    '文字': '考察汉字读音、书写和词语用法',
+    '文法': '测试语法规则和句子结构的掌握程度',
+    '読解': '训练阅读理解和文章分析能力',
+    '聴解': '提高听力理解和口语交际能力'
+  }
+  return descriptions[question.tixing] || ''
+}
+
+const startPractice = (question: any) => {
   if (!authStore.isLoggedIn) {
     router.push({
       path: '/auth/login',
@@ -243,90 +272,98 @@ const downloadApp = () => {
 }
 
 .practice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
 }
 
-.practice-card {
+.question-type-group {
   background-color: white;
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-
-    .btn-start {
-      background-color: var(--primary-dark);
-
-      i {
-        transform: translateX(4px);
-      }
-    }
-  }
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-md);
-}
-
-.level-badge,
-.type-badge {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.level-badge {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.type-badge {
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-h3 {
-  font-size: 1.2rem;
+.type-title {
+  font-size: 1.3rem;
   margin-bottom: var(--spacing-lg);
-  line-height: 1.4;
+  color: var(--primary-color);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.card-footer {
-  margin-top: auto;
+.questions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
 }
 
-.btn-start {
-  width: 100%;
+.question-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  font-weight: 500;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   cursor: pointer;
   transition: all var(--transition-fast);
 
-  i {
-    transition: transform var(--transition-fast);
+  &:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
   }
+}
+
+.question-id {
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  min-width: 50px;
+  text-align: center;
+
+  &.level-n1 {
+    background-color: #9C27B0;
+  }
+
+  &.level-n2 {
+    background-color: #F44336;
+  }
+
+  &.level-n3 {
+    background-color: #FF9800;
+  }
+
+  &.level-n4 {
+    background-color: #2196F3;
+  }
+
+  &.level-n5 {
+    background-color: #4CAF50;
+  }
+}
+
+.question-info {
+  flex: 1;
+}
+
+.question-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.question-description {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.4;
 }
 
 .purchase-dialog,
 .download-dialog {
-  :deep(.el-dialog__header)  {
+  :deep(.el-dialog__header) {
     margin-right: 0;
     text-align: center;
   }
