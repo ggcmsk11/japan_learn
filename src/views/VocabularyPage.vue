@@ -71,9 +71,9 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import WordCard from '../components/vocabulary/WordCard.vue'
+import { API_ENDPOINTS } from '../config/api'
 
 // API配置
-const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/vocabulary/wordCards'
 const DEFAULT_CONFIG = {
   userId: '20250309125643',
   token: '99b90b812938ea7929fc5f267f305843',
@@ -115,7 +115,7 @@ const fetchWords = async () => {
   error.value = ''
 
   try {
-    const response = await axios.post(API_URL, {
+    const response = await axios.post(API_ENDPOINTS.vocabulary.wordCards, {
       ...DEFAULT_CONFIG,
       jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value
     })

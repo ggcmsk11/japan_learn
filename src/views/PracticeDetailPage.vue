@@ -256,10 +256,10 @@ const startExam = async () => {
       userId: authStore.userInfo?.userId || '',
       token: authStore.token || '',
       user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-      jpltLevel: currentQuestion.value.jlptLevel,
-      isPaid: authStore.isPaid || 0,
+      isPaid: authStore.isPaid || 1,
       isReadAllQuestions: 1,
-      usedGids: []
+      usedGids: [],
+      questionBankId: currentQuestion.value.questionBankId
     })
 
     if (response.data.code === 200) {

@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from './api'
+
 export interface QuestionBank {
   jlptLevel: string
   tixing: string
@@ -10,23 +12,23 @@ export interface QuestionBank {
 const getApiEndpoint = (id: number): string => {
   // 单词题
   if ([101, 102, 103, 104, 201, 202, 203, 204, 205, 206, 301, 302, 303, 304, 305, 401, 402, 403, 404, 405, 501, 502, 503, 504].includes(id)) {
-    return 'https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getDanCiIndTi'
+    return API_ENDPOINTS.practice.questions.getDanCiIndTi
   }
   // 语法题
   if ([111, 112, 211, 212, 311, 312, 411, 412, 511, 512].includes(id)) {
-    return 'https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getYuFaIndTi'
+    return API_ENDPOINTS.practice.questions.getYuFaIndTi
   }
   // 阅读理解题
   if ([113, 121, 122, 123, 124, 125, 126, 213, 221, 222, 223, 224, 225, 313, 321, 322, 323, 324].includes(id)) {
-    return 'https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getYueDuComTi'
+    return API_ENDPOINTS.practice.questions.getYueDuComTi
   }
   // 听力单题
   if ([131, 132, 133, 134, 135, 231, 232, 233, 234, 235, 331, 332, 333, 334, 335, 431, 432, 433, 531].includes(id)) {
-    return 'https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getTiLiIndTi'
+    return API_ENDPOINTS.practice.questions.getTiLiIndTi
   }
   // 听力综合题
   if ([136, 236].includes(id)) {
-    return 'https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getTiLiComTi'
+    return API_ENDPOINTS.practice.questions.getTiLiComTi
   }
   return ''
 }
