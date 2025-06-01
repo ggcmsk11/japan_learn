@@ -257,10 +257,9 @@ const startExam = async () => {
       token: authStore.token || '',
       user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
       jpltLevel: currentQuestion.value.jlptLevel,
-      wordCount: 10,
-      loginType: 0,
-      useType: 0,
-      userTypeUseWordId: 2025000488
+      isPaid: authStore.isPaid || 0,
+      isReadAllQuestions: authStore.isReadAllQuestions || 0,
+      usedGids: []
     })
 
     if (response.data.code === 200) {
