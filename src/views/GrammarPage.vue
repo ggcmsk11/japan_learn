@@ -16,7 +16,7 @@
               v-for="level in levels"
               :key="level"
               :class="['filter-btn', { active: currentLevel === level }]"
-              @click="setLevel(level)"
+              @click="currentLevel = level"
             >
               {{ level }}
             </button>
@@ -35,20 +35,24 @@
       </div>
 
       <div v-else class="grammar-grid">
-        <div 
-          v-for="point in grammarPoints" 
-          :key="point.grammarId"
-          class="grammar-card"
-          @click="navigateToDetail(point)"
-        >
-          <div class="level-badge">{{ point.jlptLevel }}</div>
-          <h3>{{ point.grammarName }}</h3>
-          <p class="explanation">{{ point.grammarMeaning }}</p>
-          
-          <button class="btn-detail">
-            查看详情
-            <i class="ri-arrow-right-line"></i>
-          </button>
+        <div v-for="type in filteredTypes" :key="type" class="question-type-group">
+          <h3 class="type-title">{{ type }}</h3>
+          <div class="questions-list">
+            <div 
+              v-for="grammar in getGrammarByType(type)" 
+              :key="grammar.grammarId"
+              class="question-card"
+              @click="startPractice(grammar)"
+            >
+              <div :class="['question-id', getLevelClass(grammar.jlptLevel)]">
+                {{ grammar.grammarId }}
+              </div>
+              <div class="question-info">
+                <h4 class="question-title">{{ grammar.grammarName }}</h4>
+                <p class="question-description">{{ grammar.grammarMeaning }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -66,57 +70,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/grammar/grammerCards'
-
-const getConfig = () => {
-  return {
-    userId: authStore.userInfo?.userId || '',
-    token: authStore.token || '',
-    user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
-    loginType: 2,
-    useType: 2,
-    userTypeUseGrammarId: 2025000241,
-    jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
-    grammarCount: 6
-  }
-}
-
-interface GrammarPoint {
-  grammarId: number
-  grammarName: string
-  grammarForm: string
-  grammarMeaning: string
-  exampleSentence1: string
-  exampleTranslation1: string
-  exampleSentence2: string
-  exampleTranslation2: string
-  exampleSentence3: string
-  exampleTranslation3: string
-  jlptLevel: string
-}
-
 const currentLevel = ref('全部')
-const grammarPoints = ref<GrammarPoint[]>([])
+const grammarPoints = ref([])
 const loading = ref(false)
 const error = ref('')
 
 const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
+const types = ['文字', '文法', '読解', '聴解']
 
-const setLevel = async (level: string) => {
-  if (level === currentLevel.value) return
-  
-  currentLevel.value = level
-  grammarPoints.value = []
-  await fetchGrammar()
+const filteredTypes = computed(() => {
+  const types = new Set(grammarPoints.value.map(g => g.type))
+  return Array.from(types)
+})
+
+const getGrammarByType = (type: string) => {
+  return grammarPoints.value.filter(g => g.type === type)
+}
+
+const getLevelClass = (level: string) => {
+  return {
+    'level-n1': level === 'N1',
+    'level-n2': level === 'N2',
+    'level-n3': level === 'N3',
+    'level-n4': level === 'N4',
+    'level-n5': level === 'N5'
+  }
 }
 
 const fetchGrammar = async () => {
@@ -129,13 +115,28 @@ const fetchGrammar = async () => {
   error.value = ''
 
   try {
-    const config = getConfig()
-    const response = await axios.post(API_URL, config)
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_questions/questions/getYuFaIndTi', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: authStore.userInfo?.userId || '',
+        token: authStore.token || '',
+        user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
+        jpltLevel: currentLevel.value === '全部' ? 'N' : currentLevel.value,
+        loginType: 2,
+        useType: 0,
+        userTypeUseGrammarId: 2025000241
+      })
+    })
 
-    if (response.data.code === 200) {
-      grammarPoints.value = response.data.data
+    const data = await response.json()
+
+    if (data.code === 200) {
+      grammarPoints.value = data.data
     } else {
-      throw new Error(response.data.msg || '获取语法失败')
+      throw new Error(data.msg || '获取语法失败')
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : '获取语法失败，请稍后重试'
@@ -146,19 +147,21 @@ const fetchGrammar = async () => {
 }
 
 const loadMore = () => {
-  if (!authStore.isLoggedIn) {
-    router.push('/auth/login')
-    return
-  }
   fetchGrammar()
 }
 
-const navigateToDetail = (grammar: GrammarPoint) => {
+const startPractice = (grammar: any) => {
   if (!authStore.isLoggedIn) {
     router.push('/auth/login')
     return
   }
-  
+
+  const level = grammar.jlptLevel as keyof typeof authStore.permissions
+  if (!authStore.hasPermission(level)) {
+    ElMessage.warning('请先开通会员')
+    return
+  }
+
   // Store grammar data in sessionStorage
   sessionStorage.setItem('currentGrammar', JSON.stringify(grammar))
   router.push(`/grammar/${grammar.grammarId}`)
@@ -200,15 +203,9 @@ onMounted(() => {
   padding: var(--spacing-lg);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-xl);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-lg);
 }
 
 .filter-group {
-  flex: 1;
-  min-width: 200px;
-
   label {
     display: block;
     font-weight: 500;
@@ -244,77 +241,89 @@ onMounted(() => {
   }
 }
 
-.grammar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.grammar-card {
+.question-type-group {
   background-color: white;
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
-  position: relative;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-
-    .btn-detail {
-      background-color: var(--primary-dark);
-
-      i {
-        transform: translateX(4px);
-      }
-    }
-  }
 }
 
-.level-badge {
-  position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  background-color: var(--primary-color);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-h3 {
+.type-title {
   font-size: 1.3rem;
-  margin-bottom: var(--spacing-md);
-  padding-right: 60px;
+  margin-bottom: var(--spacing-lg);
+  color: var(--primary-color);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.explanation {
-  color: var(--text-light);
-  margin-bottom: var(--spacing-md);
-  line-height: 1.6;
+.questions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
 }
 
-.btn-detail {
-  width: 100%;
+.question-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  font-weight: 500;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   cursor: pointer;
   transition: all var(--transition-fast);
 
-  i {
-    transition: transform var(--transition-fast);
+  &:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
   }
+}
+
+.question-id {
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  min-width: 50px;
+  text-align: center;
+
+  &.level-n1 {
+    background-color: #9C27B0;
+  }
+
+  &.level-n2 {
+    background-color: #F44336;
+  }
+
+  &.level-n3 {
+    background-color: #FF9800;
+  }
+
+  &.level-n4 {
+    background-color: #2196F3;
+  }
+
+  &.level-n5 {
+    background-color: #4CAF50;
+  }
+}
+
+.question-info {
+  flex: 1;
+}
+
+.question-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.question-description {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.4;
 }
 
 .loading-state,
