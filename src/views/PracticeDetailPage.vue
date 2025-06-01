@@ -258,7 +258,7 @@ const startExam = async () => {
       user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
       jpltLevel: currentQuestion.value.jlptLevel,
       isPaid: authStore.isPaid || 0,
-      isReadAllQuestions: authStore.isReadAllQuestions || 0,
+      isReadAllQuestions: authStore.isReadAllQuestions || 1,
       usedGids: []
     })
 
