@@ -8,9 +8,6 @@
     </div>
 
     <div class="container">
-      <!-- Add vocabulary game component -->
-      <VocabularyGame />
-
       <div class="level-filters">
         <button 
           v-for="level in ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']" 
@@ -70,11 +67,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import WordCard from '../components/vocabulary/WordCard.vue'
-import VocabularyGame from '../components/vocabulary/VocabularyGame.vue'
 
 // API配置
 const API_URL = 'https://www.dlmy.tech/chunshua-api/chunshua_questions/vocabulary/wordCards'

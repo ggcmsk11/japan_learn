@@ -160,15 +160,24 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background-color: transparent;
   transition: all 0.3s ease;
-  border-bottom: 1px solid transparent;
   
   &.scrolled {
     background-color: white;
-    border-bottom-color: var(--border-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    
+    .logo-text, .logo-jp {
+      color: var(--text-color);
+    }
+    
+    .desktop-nav a {
+      color: var(--text-color);
+      
+      &:hover, &.router-link-active {
+        color: var(--primary-color);
+      }
+    }
   }
 }
 
@@ -210,32 +219,26 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
+  height: 60px;
 }
 
 .logo {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-  }
   
   .logo-text {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 2px;
+    color: var(--text-color);
+    transition: color 0.3s ease;
   }
   
   .logo-jp {
     font-size: 0.75rem;
-    color: var(--text-light);
+    color: var(--text-color);
     opacity: 0.8;
+    transition: color 0.3s ease;
   }
 }
 
@@ -251,39 +254,18 @@ onUnmounted(() => {
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 30px;
     
     li {
+      margin: 0 15px;
+      
       a {
         color: var(--text-color);
         text-decoration: none;
-        font-size: 1rem;
-        font-weight: 500;
-        padding: 8px 0;
-        position: relative;
+        font-size: 0.95rem;
         transition: color 0.3s ease;
         
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background-color: var(--primary-color);
-          transform: scaleX(0);
-          transition: transform 0.3s ease;
-          transform-origin: right;
-        }
-        
-        &:hover,
-        &.router-link-active {
+        &:hover, &.router-link-active {
           color: var(--primary-color);
-          
-          &::after {
-            transform: scaleX(1);
-            transform-origin: left;
-          }
         }
       }
     }
@@ -345,12 +327,11 @@ onUnmounted(() => {
   align-items: center;
   background-color: var(--primary-color);
   border: none;
-  border-radius: 20px;
+  border-radius: 4px;
   color: white;
-  padding: 8px 16px;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: background-color 0.3s ease;
   
   @media (min-width: 768px) {
     display: flex;
@@ -362,7 +343,6 @@ onUnmounted(() => {
   
   &:hover {
     background-color: var(--primary-dark);
-    transform: translateY(-2px);
   }
 }
 
@@ -371,12 +351,11 @@ onUnmounted(() => {
   align-items: center;
   background-color: var(--accent-color);
   border: none;
-  border-radius: 20px;
+  border-radius: 4px;
   color: white;
-  padding: 8px 16px;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: background-color 0.3s ease;
   
   @media (min-width: 768px) {
     display: flex;
@@ -388,7 +367,6 @@ onUnmounted(() => {
   
   &:hover {
     background-color: var(--accent-dark);
-    transform: translateY(-2px);
   }
 }
 
@@ -401,14 +379,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
-  
-  &:hover {
-    background-color: var(--background-color);
-  }
   
   @media (min-width: 768px) {
     display: none;
@@ -417,7 +387,7 @@ onUnmounted(() => {
 
 .mobile-menu {
   position: fixed;
-  top: 70px;
+  top: 60px;
   left: 0;
   width: 100%;
   background-color: white;
@@ -441,18 +411,18 @@ onUnmounted(() => {
     
     li {
       padding: 15px 20px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid #eee;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
+      transition: background-color 0.3s ease;
+      color: var(--text-color);
       
       &:hover {
-        background-color: var(--background-color);
-        color: var(--primary-color);
+        background-color: #f5f5f5;
       }
       
       &.mobile-login {
         color: var(--primary-color);
+        font-weight: 500;
       }
     }
   }
