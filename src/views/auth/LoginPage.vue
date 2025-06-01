@@ -1,3 +1,156 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../../stores/auth'
+import md5 from 'md5'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+const showPassword = ref(false)
+const showDownloadDialog = ref(false)
+const showAreaCodeSelect = ref(false)
+const isSubmitting = ref(false)
+const areaCode = ref('86')
+
+const loginForm = ref({
+  phone: '',
+  password: '',
+  remember: false
+})
+
+const areaCodes = [
+  { country: '中国', code: '86' },
+  { country: '日本', code: '81' },
+  { country: '韩国', code: '82' },
+  { country: '中国香港', code: '852' },
+  { country: '中国澳门', code: '853' },
+  { country: '中国台湾', code: '886' },
+  { country: '新加坡', code: '65' },
+  { country: '马来西亚', code: '60' },
+  { country: '泰国', code: '66' },
+  { country: '越南', code: '84' },
+  { country: '印度尼西亚', code: '62' },
+  { country: '菲律宾', code: '63' },
+  { country: '澳大利亚', code: '61' },
+  { country: '新西兰', code: '64' },
+  { country: '美国', code: '1' },
+  { country: '加拿大', code: '1' },
+  { country: '英国', code: '44' },
+  { country: '法国', code: '33' },
+  { country: '德国', code: '49' },
+  { country: '意大利', code: '39' },
+  { country: '西班牙', code: '34' },
+  { country: '葡萄牙', code: '351' },
+  { country: '俄罗斯', code: '7' },
+  { country: '巴西', code: '55' },
+  { country: '阿根廷', code: '54' },
+  { country: '墨西哥', code: '52' },
+  { country: '印度', code: '91' },
+  { country: '巴基斯坦', code: '92' },
+  { country: '孟加拉国', code: '880' },
+  { country: '斯里兰卡', code: '94' },
+  { country: '尼泊尔', code: '977' },
+  { country: '缅甸', code: '95' },
+  { country: '柬埔寨', code: '855' },
+  { country: '老挝', code: '856' },
+  { country: '蒙古', code: '976' },
+  { country: '哈萨克斯坦', code: '7' },
+  { country: '乌兹别克斯坦', code: '998' },
+  { country: '土耳其', code: '90' },
+  { country: '以色列', code: '972' },
+  { country: '阿联酋', code: '971' },
+  { country: '沙特阿拉伯', code: '966' },
+  { country: '埃及', code: '20' },
+  { country: '南非', code: '27' },
+  { country: '荷兰', code: '31' },
+  { country: '比利时', code: '32' },
+  { country: '瑞典', code: '46' },
+  { country: '挪威', code: '47' },
+  { country: '芬兰', code: '358' },
+  { country: '丹麦', code: '45' },
+  { country: '瑞士', code: '41' }
+]
+
+const selectAreaCode = (code: string) => {
+  areaCode.value = code
+  showAreaCodeSelect.value = false
+}
+
+const handleLogin = async () => {
+  try {
+    isSubmitting.value = true
+    const pwKey = "chunshualiguan"
+    const encryptedPassword = md5(loginForm.value.password + pwKey)
+    const phoneNumber = areaCode.value + loginForm.value.phone
+    
+    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_account: "11",
+        password: encryptedPassword,
+        phone_number: phoneNumber,
+        device_info: "1",
+        ip_address: "1",
+        loginType: 2
+      })
+    })
+    
+    const data = await response.json()
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || '登录失败')
+    }
+    
+    // Store user info in store
+    authStore.login(data.data.token, data.data, phoneNumber)
+    
+    // Store login state if remember is checked
+    if (loginForm.value.remember) {
+      localStorage.setItem('rememberedLogin', JSON.stringify({
+        phone: loginForm.value.phone,
+        password: loginForm.value.password,
+        areaCode: areaCode.value
+      }))
+    } else {
+      localStorage.removeItem('rememberedLogin')
+    }
+
+    // Show success message for 1 second
+    ElMessage({
+      message: '登录成功',
+      type: 'success',
+      duration: 1000
+    })
+    
+    // Redirect to home page after successful login
+    router.push(route.query.redirect?.toString() || '/')
+    
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+onMounted(() => {
+  // Check for remembered login
+  const remembered = localStorage.getItem('rememberedLogin')
+  if (remembered) {
+    const { phone, password, areaCode: savedAreaCode } = JSON.parse(remembered)
+    loginForm.value.phone = phone
+    loginForm.value.password = password
+    loginForm.value.remember = true
+    areaCode.value = savedAreaCode
+  }
+})
+</script>
+
 <template>
   <div class="auth-page">
     <div class="auth-container">
@@ -93,7 +246,7 @@
       </template>
     </el-dialog>
 
-    <!-- Download dialog -->
+    <!-- Download Dialog -->
     <el-dialog
       v-model="showDownloadDialog"
       title="下载纯刷日语APP"
@@ -120,115 +273,6 @@
     </el-dialog>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { useAuthStore } from '../../stores/auth'
-import md5 from 'md5'
-
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-
-const showPassword = ref(false)
-const showDownloadDialog = ref(false)
-const showAreaCodeSelect = ref(false)
-const isSubmitting = ref(false)
-const areaCode = ref('86')
-
-const loginForm = ref({
-  phone: '',
-  password: '',
-  remember: false
-})
-
-const areaCodes = [
-  { country: '中国', code: '86' },
-  { country: '中国香港', code: '852' },
-  { country: '中国澳门', code: '853' },
-  { country: '中国台湾', code: '886' },
-  { country: '日本', code: '81' },
-  { country: '韩国', code: '82' }
-]
-
-const selectAreaCode = (code: string) => {
-  areaCode.value = code
-  showAreaCodeSelect.value = false
-}
-
-const handleLogin = async () => {
-  try {
-    isSubmitting.value = true
-    const pwKey = "chunshualiguan"
-    const encryptedPassword = md5(loginForm.value.password + pwKey)
-    const phoneNumber = areaCode.value + loginForm.value.phone
-    
-    const response = await fetch('https://www.dlmy.tech/chunshua-api/chunshua_users/info/chunshuaLogin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        user_account: "11",
-        password: encryptedPassword,
-        phone_number: phoneNumber,
-        device_info: "1",
-        ip_address: "1",
-        loginType: 2
-      })
-    })
-    
-    const data = await response.json()
-
-    if (data.code !== 200) {
-      throw new Error(data.msg || '登录失败')
-    }
-    
-    // Store user info in store
-    authStore.login(data.data.token, data.data, phoneNumber)
-    
-    // Store login state if remember is checked
-    if (loginForm.value.remember) {
-      localStorage.setItem('rememberedLogin', JSON.stringify({
-        phone: loginForm.value.phone,
-        password: loginForm.value.password,
-        areaCode: areaCode.value
-      }))
-    } else {
-      localStorage.removeItem('rememberedLogin')
-    }
-
-    // Show success message for 1 second
-    ElMessage({
-      message: '登录成功',
-      type: 'success',
-      duration: 1000
-    })
-    
-    // Redirect to home page after successful login
-    router.push(route.query.redirect?.toString() || '/')
-    
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-onMounted(() => {
-  // Check for remembered login
-  const remembered = localStorage.getItem('rememberedLogin')
-  if (remembered) {
-    const { phone, password, areaCode: savedAreaCode } = JSON.parse(remembered)
-    loginForm.value.phone = phone
-    loginForm.value.password = password
-    loginForm.value.remember = true
-    areaCode.value = savedAreaCode
-  }
-})
-</script>
 
 <style lang="scss" scoped>
 .auth-page {
