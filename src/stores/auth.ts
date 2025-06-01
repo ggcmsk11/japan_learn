@@ -26,6 +26,8 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(initialState?.token || '')
   const userInfo = ref<UserInfo | null>(initialState?.userInfo || null)
   const phoneNumber = ref(initialState?.phoneNumber || '')
+  const isActive = ref(initialState?.isActive || 0)
+  const isPaid = ref(initialState?.isPaid || 0)
   const permissions = ref({
     N5: true,
     N4: true,
@@ -42,6 +44,8 @@ export const useAuthStore = defineStore('auth', () => {
       phoneNumber.value = phone
       userInfo.value.phoneNumber = phone
     }
+    isActive.value = user.isActive
+    isPaid.value = user.isPaid
     
     permissions.value = {
       N5: !!user.japaneseN5,
@@ -55,7 +59,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('authState', JSON.stringify({
       token: tokenValue,
       userInfo: user,
-      phoneNumber: phone
+      phoneNumber: phone,
+      isActive: user.isActive,
+      isPaid: user.isPaid
     }))
   }
 
@@ -64,6 +70,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = ''
     userInfo.value = null
     phoneNumber.value = ''
+    isActive.value = 0
+    isPaid.value = 0
     localStorage.removeItem('authState')
   }
 
@@ -76,6 +84,8 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     userInfo,
     phoneNumber,
+    isActive,
+    isPaid,
     permissions,
     login,
     logout,
