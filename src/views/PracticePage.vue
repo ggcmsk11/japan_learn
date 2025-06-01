@@ -47,17 +47,13 @@
         >
           <div class="card-header">
             <div class="level-badge">{{ question.jlptLevel }}</div>
+            <div class="question-id">{{ question.questionBankId }}</div>
+          </div>
+          <div class="card-content">
             <div class="type-badge">{{ question.tixing }}</div>
+            <h3>{{ question.question }}</h3>
           </div>
-          
-          <h3>{{ question.question }}</h3>
-          
-          <div class="card-footer">
-            <button class="btn-start">
-              开始练习
-              <i class="ri-arrow-right-line"></i>
-            </button>
-          </div>
+          <button class="btn-start">开始练习</button>
         </div>
       </div>
     </div>
@@ -245,27 +241,23 @@ const downloadApp = () => {
 .practice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .practice-card {
   background-color: white;
   border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
   cursor: pointer;
+  transition: all var(--transition-normal);
 
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 
     .btn-start {
       background-color: var(--primary-dark);
-
-      i {
-        transform: translateX(4px);
-      }
     }
   }
 }
@@ -273,60 +265,57 @@ const downloadApp = () => {
 .card-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--spacing-md);
-}
-
-.level-badge,
-.type-badge {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
 .level-badge {
   background-color: var(--primary-color);
   color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.question-id {
+  color: var(--text-light);
+  font-size: 0.8rem;
+}
+
+.card-content {
+  margin-bottom: var(--spacing-md);
 }
 
 .type-badge {
+  display: inline-block;
   background-color: var(--background-color);
-  color: var(--text-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-bottom: var(--spacing-xs);
 }
 
 h3 {
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-lg);
+  font-size: 1rem;
   line-height: 1.4;
-}
-
-.card-footer {
-  margin-top: auto;
 }
 
 .btn-start {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 10px;
+  padding: 8px;
   border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-
-  i {
-    transition: transform var(--transition-fast);
-  }
+  font-size: 0.9rem;
+  transition: background-color var(--transition-fast);
 }
 
 .purchase-dialog,
 .download-dialog {
-  :deep(.el-dialog__header)  {
+  :deep(.el-dialog__header) {
     margin-right: 0;
     text-align: center;
   }
