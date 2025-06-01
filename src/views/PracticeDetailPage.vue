@@ -3,31 +3,19 @@
     <div v-if="!examStarted && !examCompleted" class="exam-intro">
       <div class="container">
         <div class="exam-header">
-          <h1>{{ exam.title }}</h1>
+          <h1>{{ currentQuestion?.question }}</h1>
           <div class="exam-meta">
             <div class="meta-item">
               <i class="ri-time-line"></i>
-              <span>{{ exam.timeLimit }}分钟</span>
-            </div>
-            <div class="meta-item">
-              <i class="ri-question-line"></i>
-              <span>{{ getTotalQuestions() }}题</span>
+              <span>{{ timeLimit }}分钟</span>
             </div>
             <div class="meta-item">
               <i class="ri-file-list-line"></i>
-              <span>{{ exam.sections.length }}个部分</span>
+              <span>{{ currentQuestion?.tixing }}</span>
             </div>
-          </div>
-        </div>
-
-        <div class="exam-sections">
-          <h2>考试内容</h2>
-          <div class="section-list">
-            <div v-for="section in exam.sections" :key="section.id" class="section-item">
-              <div class="section-info">
-                <h3>{{ section.title }}</h3>
-                <p>{{ section.questions.length }}道题目</p>
-              </div>
+            <div class="meta-item">
+              <i class="ri-award-line"></i>
+              <span>{{ currentQuestion?.jlptLevel }}</span>
             </div>
           </div>
         </div>
@@ -35,7 +23,7 @@
         <div class="exam-instructions">
           <h2>考试说明</h2>
           <ul>
-            <li>考试时间为{{ exam.timeLimit }}分钟，请合理分配时间</li>
+            <li>考试时间为{{ timeLimit }}分钟，请合理分配时间</li>
             <li>考试过程中请勿刷新页面或离开当前页面</li>
             <li>所有题目答完后才能提交考试</li>
             <li>提交后将立即显示考试结果</li>
@@ -55,12 +43,12 @@
           <div class="header-content">
             <div class="exam-progress">
               <div class="progress-text">
-                第 {{ currentQuestionIndex + 1 }}/{{ getTotalQuestions() }} 题
+                第 {{ currentQuestionIndex + 1 }}/{{ questions.length }} 题
               </div>
               <div class="progress-bar">
                 <div 
                   class="progress-fill"
-                  :style="{ width: `${(currentQuestionIndex + 1) / getTotalQuestions() * 100}%` }"
+                  :style="{ width: `${(currentQuestionIndex + 1) / questions.length * 100}%` }"
                 ></div>
               </div>
             </div>
@@ -77,19 +65,19 @@
       <div class="container">
         <div class="question-container">
           <div class="question-content">
-            <p class="question-text jp-text">{{ currentQuestion.text }}</p>
+            <p class="question-text jp-text">{{ questions[currentQuestionIndex]?.text }}</p>
             
             <div class="answer-options">
               <label 
-                v-for="(option, index) in currentQuestion.options" 
+                v-for="(option, index) in questions[currentQuestionIndex]?.options" 
                 :key="index"
-                :class="['option-item', { selected: userAnswers[currentQuestion.id] === index }]"
+                :class="['option-item', { selected: userAnswers[questions[currentQuestionIndex]?.id] === index }]"
               >
                 <input 
                   type="radio" 
-                  :name="currentQuestion.id"
+                  :name="questions[currentQuestionIndex]?.id"
                   :value="index"
-                  v-model="userAnswers[currentQuestion.id]"
+                  v-model="userAnswers[questions[currentQuestionIndex]?.id]"
                 >
                 <span class="option-text jp-text">{{ option }}</span>
               </label>
@@ -108,7 +96,7 @@
             <button 
               class="nav-btn next" 
               @click="nextQuestion"
-              :disabled="currentQuestionIndex === getTotalQuestions() - 1"
+              :disabled="currentQuestionIndex === questions.length - 1"
             >
               下一题
               <i class="ri-arrow-right-s-line"></i>
@@ -153,48 +141,45 @@
         </div>
 
         <div class="results-content">
-          <div class="section-results" v-for="section in exam.sections" :key="section.id">
-            <h2>{{ section.title }}</h2>
-            <div class="questions-review">
-              <div 
-                v-for="question in section.questions" 
-                :key="question.id"
-                class="question-review"
-              >
-                <div class="question-header">
-                  <div class="question-number">Q{{ getQuestionNumber(question) }}</div>
+          <div class="questions-review">
+            <div 
+              v-for="(question, index) in questions" 
+              :key="question.id"
+              class="question-review"
+            >
+              <div class="question-header">
+                <div class="question-number">Q{{ index + 1 }}</div>
+                <div 
+                  :class="['answer-status', 
+                    userAnswers[question.id] === question.correctAnswer ? 'correct' : 'incorrect'
+                  ]"
+                >
+                  <i :class="userAnswers[question.id] === question.correctAnswer ? 
+                    'ri-check-line' : 'ri-close-line'"></i>
+                </div>
+              </div>
+
+              <div class="question-content">
+                <p class="question-text jp-text">{{ question.text }}</p>
+                <div class="options-review">
                   <div 
-                    :class="['answer-status', 
-                      userAnswers[question.id] === question.correctAnswer ? 'correct' : 'incorrect'
+                    v-for="(option, optionIndex) in question.options" 
+                    :key="optionIndex"
+                    :class="['option-item',
+                      {
+                        'selected': userAnswers[question.id] === optionIndex,
+                        'correct': question.correctAnswer === optionIndex,
+                        'incorrect': userAnswers[question.id] === optionIndex && 
+                          userAnswers[question.id] !== question.correctAnswer
+                      }
                     ]"
                   >
-                    <i :class="userAnswers[question.id] === question.correctAnswer ? 
-                      'ri-check-line' : 'ri-close-line'"></i>
+                    {{ option }}
                   </div>
                 </div>
-
-                <div class="question-content">
-                  <p class="question-text jp-text">{{ question.text }}</p>
-                  <div class="options-review">
-                    <div 
-                      v-for="(option, index) in question.options" 
-                      :key="index"
-                      :class="['option-item',
-                        {
-                          'selected': userAnswers[question.id] === index,
-                          'correct': question.correctAnswer === index,
-                          'incorrect': userAnswers[question.id] === index && 
-                            userAnswers[question.id] !== question.correctAnswer
-                        }
-                      ]"
-                    >
-                      {{ option }}
-                    </div>
-                  </div>
-                  <div v-if="question.explanation" class="explanation">
-                    <div class="explanation-title">解析</div>
-                    <p>{{ question.explanation }}</p>
-                  </div>
+                <div v-if="question.explanation" class="explanation">
+                  <div class="explanation-title">解析</div>
+                  <p>{{ question.explanation }}</p>
                 </div>
               </div>
             </div>
@@ -219,9 +204,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+import type { QuestionBank } from '../config/questionBanks'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 interface Question {
   id: string
@@ -231,70 +221,15 @@ interface Question {
   explanation?: string
 }
 
-interface ExamSection {
-  id: string
-  title: string
-  questions: Question[]
-}
-
-interface Exam {
-  id: string
-  title: string
-  level: string
-  year: string
-  timeLimit: number
-  sections: ExamSection[]
-}
-
-const exam = ref<Exam>({
-  id: "jlpt-n3-2022",
-  title: "JLPT N3 模擬試験 2022年",
-  level: "N3",
-  year: "2022",
-  timeLimit: 120,
-  sections: [
-    {
-      id: "vocabulary",
-      title: "語彙",
-      questions: [
-        {
-          id: "vocab-1",
-          text: "彼女は（　　）話し方をするので、私には理解できないことがある。",
-          options: ["ぼんやりした", "はっきりした", "めずらしい", "すばらしい"],
-          correctAnswer: 0,
-          explanation: "「ぼんやりした」表示「模糊的，不清楚的」，符合句意\"她说话方式模糊，所以我有时听不懂\"。"
-        },
-        {
-          id: "vocab-2",
-          text: "先週のテストは（　　）でした。今週のテストは簡単だと思います。",
-          options: ["親切", "便利", "大切", "難しい"],
-          correctAnswer: 3,
-          explanation: "「難しい」表示「困难的」，符合句意\"上周的考试很难。我认为这周的考试会简单\"。"
-        }
-      ]
-    },
-    {
-      id: "grammar",
-      title: "文法",
-      questions: [
-        {
-          id: "grammar-1",
-          text: "この仕事は来週（　　）終わらせなければなりません。",
-          options: ["まで", "までに", "から", "からに"],
-          correctAnswer: 1,
-          explanation: "「までに」表示「到...为止」，用于表示截止期限，符合句意\"这项工作必须在下周之前完成\"。"
-        }
-      ]
-    }
-  ]
-})
-
+const timeLimit = 30 // 默认30分钟
 const examStarted = ref(false)
 const examCompleted = ref(false)
 const currentQuestionIndex = ref(0)
-const remainingTime = ref(exam.value.timeLimit * 60)
+const remainingTime = ref(timeLimit * 60)
 const userAnswers = ref<Record<string, number>>({})
 const timer = ref<number | null>(null)
+const questions = ref<Question[]>([])
+const currentQuestion = ref<QuestionBank | null>(null)
 
 const examResults = ref({
   score: 0,
@@ -303,35 +238,9 @@ const examResults = ref({
   timeSpent: 0
 })
 
-const currentQuestion = computed(() => {
-  let questionCount = 0
-  for (const section of exam.value.sections) {
-    if (currentQuestionIndex.value < questionCount + section.questions.length) {
-      return section.questions[currentQuestionIndex.value - questionCount]
-    }
-    questionCount += section.questions.length
-  }
-  return exam.value.sections[0].questions[0]
-})
-
 const canSubmit = computed(() => {
-  return getTotalQuestions() === Object.keys(userAnswers.value).length
+  return questions.value.length === Object.keys(userAnswers.value).length
 })
-
-const getTotalQuestions = () => {
-  return exam.value.sections.reduce((total, section) => total + section.questions.length, 0)
-}
-
-const getQuestionNumber = (question: Question) => {
-  let number = 1
-  for (const section of exam.value.sections) {
-    for (const q of section.questions) {
-      if (q.id === question.id) return number
-      number++
-    }
-  }
-  return number
-}
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -339,9 +248,38 @@ const formatTime = (seconds: number) => {
   return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
 }
 
-const startExam = () => {
-  examStarted.value = true
-  startTimer()
+const startExam = async () => {
+  if (!currentQuestion.value) return
+
+  try {
+    const response = await axios.post(currentQuestion.value.apiEndpoint, {
+      userId: authStore.userInfo?.userId || '',
+      token: authStore.token || '',
+      user_phone: authStore.phoneNumber?.replace(/^\+/, '') || '',
+      jpltLevel: currentQuestion.value.jlptLevel,
+      wordCount: 10,
+      loginType: 0,
+      useType: 0,
+      userTypeUseWordId: 2025000488
+    })
+
+    if (response.data.code === 200) {
+      questions.value = response.data.data.map((q: any) => ({
+        id: q.id,
+        text: q.text,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation
+      }))
+      examStarted.value = true
+      startTimer()
+    } else {
+      throw new Error(response.data.msg || '获取题目失败')
+    }
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '获取题目失败，请稍后重试')
+    router.push('/practice')
+  }
 }
 
 const startTimer = () => {
@@ -368,24 +306,22 @@ const prevQuestion = () => {
 }
 
 const nextQuestion = () => {
-  if (currentQuestionIndex.value < getTotalQuestions() - 1) {
+  if (currentQuestionIndex.value < questions.value.length - 1) {
     currentQuestionIndex.value++
   }
 }
 
 const calculateResults = () => {
   let correctCount = 0
-  let totalQuestions = getTotalQuestions()
+  let totalQuestions = questions.value.length
 
-  for (const section of exam.value.sections) {
-    for (const question of section.questions) {
-      if (userAnswers.value[question.id] === question.correctAnswer) {
-        correctCount++
-      }
+  for (const question of questions.value) {
+    if (userAnswers.value[question.id] === question.correctAnswer) {
+      correctCount++
     }
   }
 
-  const timeSpent = exam.value.timeLimit * 60 - remainingTime.value
+  const timeSpent = timeLimit * 60 - remainingTime.value
   const accuracy = Math.round((correctCount / totalQuestions) * 100)
   const score = Math.round((correctCount / totalQuestions) * 100)
 
@@ -407,8 +343,9 @@ const retryExam = () => {
   examStarted.value = false
   examCompleted.value = false
   currentQuestionIndex.value = 0
-  remainingTime.value = exam.value.timeLimit * 60
+  remainingTime.value = timeLimit * 60
   userAnswers.value = {}
+  questions.value = []
   examResults.value = {
     score: 0,
     correctCount: 0,
@@ -422,7 +359,22 @@ const backToPractice = () => {
 }
 
 onMounted(() => {
-  // TODO: Fetch exam data based on route.params.id
+  // Check authentication
+  if (!authStore.isLoggedIn) {
+    router.push({
+      path: '/auth/login',
+      query: { redirect: route.fullPath }
+    })
+    return
+  }
+
+  // Get question data from sessionStorage
+  const storedQuestion = sessionStorage.getItem('currentQuestion')
+  if (storedQuestion) {
+    currentQuestion.value = JSON.parse(storedQuestion)
+  } else {
+    router.push('/practice')
+  }
 })
 
 onUnmounted(() => {
@@ -467,39 +419,6 @@ onUnmounted(() => {
         color: var(--primary-color);
       }
     }
-  }
-}
-
-.exam-sections {
-  background-color: white;
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
-  margin-bottom: var(--spacing-xl);
-  box-shadow: var(--shadow-sm);
-
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-lg);
-  }
-}
-
-.section-list {
-  display: grid;
-  gap: var(--spacing-md);
-}
-
-.section-item {
-  background-color: var(--background-color);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius);
-
-  h3 {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-  }
-
-  p {
-    color: var(--text-light);
   }
 }
 
@@ -781,20 +700,6 @@ onUnmounted(() => {
   margin-bottom: var(--spacing-xl);
 }
 
-.section-results {
-  background-color: white;
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
-  margin-bottom: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
-
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-lg);
-    color: var(--primary-color);
-  }
-}
-
 .questions-review {
   display: flex;
   flex-direction: column;
@@ -802,9 +707,10 @@ onUnmounted(() => {
 }
 
 .question-review {
-  background-color: var(--background-color);
+  background-color: white;
   padding: var(--spacing-lg);
   border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
 
   .question-header {
     display: flex;

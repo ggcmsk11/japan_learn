@@ -40,84 +40,29 @@
 
       <div class="practice-grid">
         <div 
-          v-for="exam in paginatedExams" 
-          :key="exam.id" 
+          v-for="question in filteredQuestions" 
+          :key="question.questionBankId"
           class="practice-card"
+          @click="startPractice(question)"
         >
           <div class="card-header">
-            <div class="level-badge">{{ exam.level }}</div>
-            <div class="exam-type">{{ exam.type }}</div>
+            <div class="level-badge">{{ question.jlptLevel }}</div>
+            <div class="type-badge">{{ question.tixing }}</div>
           </div>
           
-          <h3>{{ exam.title }}</h3>
+          <h3>{{ question.question }}</h3>
           
-          <div class="exam-meta">
-            <div class="meta-item">
-              <i class="ri-time-line"></i>
-              <span>{{ exam.timeLimit }}分钟</span>
-            </div>
-            <div class="meta-item">
-              <i class="ri-question-line"></i>
-              <span>{{ getTotalQuestions(exam) }}题</span>
-            </div>
+          <div class="card-footer">
+            <button class="btn-start">
+              开始练习
+              <i class="ri-arrow-right-line"></i>
+            </button>
           </div>
-          
-          <div class="exam-stats">
-            <div class="stat-item">
-              <div class="stat-label">平均正确率</div>
-              <div class="stat-value">{{ exam.averageAccuracy }}%</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">完成人数</div>
-              <div class="stat-value">{{ exam.completions }}</div>
-            </div>
-          </div>
-          
-          <button class="btn-start" @click="startPractice(exam)">
-            开始练习
-            <i class="ri-arrow-right-line"></i>
-          </button>
         </div>
-      </div>
-
-      <div class="pagination" v-if="totalPages > 1">
-        <button 
-          class="page-btn prev" 
-          :disabled="currentPage === 1" 
-          @click="prevPage"
-        >
-          <i class="ri-arrow-left-s-line"></i>
-          上一页
-        </button>
-        <div class="page-numbers">
-          <button 
-            v-for="pageNum in displayedPages" 
-            :key="pageNum"
-            :class="['page-number', { active: currentPage === pageNum }]"
-            @click="currentPage = pageNum"
-          >
-            {{ pageNum }}
-          </button>
-          <span v-if="showEllipsis" class="page-dots">...</span>
-          <button 
-            v-if="showLastPage"
-            :class="['page-number', { active: currentPage === totalPages }]"
-            @click="currentPage = totalPages"
-          >
-            {{ totalPages }}
-          </button>
-        </div>
-        <button 
-          class="page-btn next" 
-          :disabled="currentPage === totalPages" 
-          @click="nextPage"
-        >
-          下一页
-          <i class="ri-arrow-right-s-line"></i>
-        </button>
       </div>
     </div>
 
+    <!-- Purchase Dialog -->
     <el-dialog
       v-model="showPurchaseDialog"
       title="开通会员"
@@ -141,6 +86,7 @@
       </template>
     </el-dialog>
 
+    <!-- Download Dialog -->
     <el-dialog
       v-model="showDownloadDialog"
       title="下载纯刷日语APP"
@@ -171,266 +117,57 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
+import { questionBanks, type QuestionBank } from '../config/questionBanks'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const currentLevel = ref('全部')
 const currentType = ref('全部')
-const currentPage = ref(1)
-const itemsPerPage = 10
 const showPurchaseDialog = ref(false)
 const showDownloadDialog = ref(false)
 
 const levels = ['全部', 'N5', 'N4', 'N3', 'N2', 'N1']
-const types = ['全部', '单词', '语法', '阅读', '听力']
+const types = ['全部', '文字', '文法', '読解', '聴解']
 
-const exams = ref([
-  {
-    id: 'n5-vocab-1',
-    title: 'N5 单词练习 (1)',
-    level: 'N5',
-    type: '单词',
-    timeLimit: 30,
-    sections: [
-      {
-        id: 'section-1',
-        title: '单词选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 85,
-    completions: 1280
-  },
-  {
-    id: 'n5-grammar-1',
-    title: 'N5 语法练习 (1)',
-    level: 'N5',
-    type: '语法',
-    timeLimit: 45,
-    sections: [
-      {
-        id: 'section-1',
-        title: '语法选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 78,
-    completions: 960
-  },
-  {
-    id: 'n4-vocab-1',
-    title: 'N4 单词练习 (1)',
-    level: 'N4',
-    type: '单词',
-    timeLimit: 30,
-    sections: [
-      {
-        id: 'section-1',
-        title: '单词选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 75,
-    completions: 850
-  },
-  {
-    id: 'n4-grammar-1',
-    title: 'N4 语法练习 (1)',
-    level: 'N4',
-    type: '语法',
-    timeLimit: 45,
-    sections: [
-      {
-        id: 'section-1',
-        title: '语法选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 72,
-    completions: 720
-  },
-  {
-    id: 'n3-vocab-1',
-    title: 'N3 单词练习 (1)',
-    level: 'N3',
-    type: '单词',
-    timeLimit: 30,
-    sections: [
-      {
-        id: 'section-1',
-        title: '单词选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 68,
-    completions: 560
-  },
-  {
-    id: 'n3-grammar-1',
-    title: 'N3 语法练习 (1)',
-    level: 'N3',
-    type: '语法',
-    timeLimit: 45,
-    sections: [
-      {
-        id: 'section-1',
-        title: '语法选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 65,
-    completions: 480
-  },
-  {
-    id: 'n2-vocab-1',
-    title: 'N2 单词练习 (1)',
-    level: 'N2',
-    type: '单词',
-    timeLimit: 30,
-    sections: [
-      {
-        id: 'section-1',
-        title: '单词选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 62,
-    completions: 320
-  },
-  {
-    id: 'n2-grammar-1',
-    title: 'N2 语法练习 (1)',
-    level: 'N2',
-    type: '语法',
-    timeLimit: 45,
-    sections: [
-      {
-        id: 'section-1',
-        title: '语法选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 58,
-    completions: 280
-  },
-  {
-    id: 'n1-vocab-1',
-    title: 'N1 单词练习 (1)',
-    level: 'N1',
-    type: '单词',
-    timeLimit: 30,
-    sections: [
-      {
-        id: 'section-1',
-        title: '单词选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 55,
-    completions: 180
-  },
-  {
-    id: 'n1-grammar-1',
-    title: 'N1 语法练习 (1)',
-    level: 'N1',
-    type: '语法',
-    timeLimit: 45,
-    sections: [
-      {
-        id: 'section-1',
-        title: '语法选择',
-        questions: new Array(10).fill(null)
-      }
-    ],
-    averageAccuracy: 52,
-    completions: 150
-  }
-])
+const filteredQuestions = computed(() => {
+  let filtered = questionBanks
 
-const filteredExams = computed(() => {
-  let filtered = exams.value
   if (currentLevel.value !== '全部') {
-    filtered = filtered.filter(exam => exam.level === currentLevel.value)
+    filtered = filtered.filter(q => q.jlptLevel === currentLevel.value)
   }
+
   if (currentType.value !== '全部') {
-    filtered = filtered.filter(exam => exam.type === currentType.value)
+    filtered = filtered.filter(q => q.tixing === currentType.value)
   }
+
   return filtered
 })
 
-const totalPages = computed(() => Math.ceil(filteredExams.value.length / itemsPerPage))
-
-const paginatedExams = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredExams.value.slice(start, end)
-})
-
-const displayedPages = computed(() => {
-  const pages = []
-  const maxVisiblePages = 5
-  let start = Math.max(1, currentPage.value - 2)
-  let end = Math.min(start + maxVisiblePages - 1, totalPages.value)
-
-  if (end - start + 1 < maxVisiblePages) {
-    start = Math.max(1, end - maxVisiblePages + 1)
-  }
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
-
-const showEllipsis = computed(() => {
-  return totalPages.value > displayedPages.value[displayedPages.value.length - 1] + 1
-})
-
-const showLastPage = computed(() => {
-  return totalPages.value > displayedPages.value[displayedPages.value.length - 1]
-})
-
-const getTotalQuestions = (exam: any) => {
-  return exam.sections.reduce((total: number, section: any) => total + section.questions.length, 0)
-}
-
-const startPractice = (exam: any) => {
+const startPractice = (question: QuestionBank) => {
   if (!authStore.isLoggedIn) {
     router.push({
       path: '/auth/login',
-      query: { redirect: `/practice/${exam.id}` }
+      query: { redirect: `/practice/${question.questionBankId}` }
     })
     return
   }
 
-  const level = exam.level as keyof typeof authStore.permissions
+  const level = question.jlptLevel as keyof typeof authStore.permissions
   if (!authStore.hasPermission(level)) {
     showPurchaseDialog.value = true
     return
   }
 
-  router.push(`/practice/${exam.id}`)
+  // Store question data in sessionStorage
+  sessionStorage.setItem('currentQuestion', JSON.stringify(question))
+  router.push(`/practice/${question.questionBankId}`)
 }
 
 const downloadApp = () => {
   showPurchaseDialog.value = false
   showDownloadDialog.value = true
-}
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
 }
 </script>
 
@@ -507,7 +244,7 @@ const nextPage = () => {
 
 .practice-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-lg);
 }
 
@@ -539,66 +276,32 @@ const nextPage = () => {
   margin-bottom: var(--spacing-md);
 }
 
+.level-badge,
+.type-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .level-badge {
   background-color: var(--primary-color);
   color: white;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.9rem;
 }
 
-.exam-type {
-  color: var(--text-light);
-  font-size: 0.9rem;
+.type-badge {
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 h3 {
   font-size: 1.2rem;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.4;
 }
 
-.exam-meta {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--text-light);
-    font-size: 0.9rem;
-
-    i {
-      font-size: 1.1rem;
-    }
-  }
-}
-
-.exam-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.stat-item {
-  text-align: center;
-
-  .stat-label {
-    font-size: 0.9rem;
-    color: var(--text-light);
-    margin-bottom: 4px;
-  }
-
-  .stat-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primary-color);
-  }
+.card-footer {
+  margin-top: auto;
 }
 
 .btn-start {
@@ -621,8 +324,9 @@ h3 {
   }
 }
 
-.purchase-dialog {
-  :deep(.el-dialog__header) {
+.purchase-dialog,
+.download-dialog {
+  :deep(.el-dialog__header)  {
     margin-right: 0;
     text-align: center;
   }
@@ -646,13 +350,6 @@ h3 {
         font-size: 0.9rem;
       }
     }
-  }
-}
-
-.download-dialog {
-  :deep(.el-dialog__header) {
-    margin-right: 0;
-    text-align: center;
   }
 
   .download-options {
