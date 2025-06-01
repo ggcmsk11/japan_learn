@@ -45,16 +45,19 @@
           class="practice-card"
           @click="startPractice(question)"
         >
-          <div class="level-badge">{{ question.jlptLevel }}</div>
-          <div class="question-content">
-            <div class="question-id">{{ question.questionBankId }}</div>
-            <h3>{{ question.question }}</h3>
-            <p class="question-type">{{ question.tixing }}</p>
+          <div class="card-header">
+            <div class="level-badge">{{ question.jlptLevel }}</div>
+            <div class="type-badge">{{ question.tixing }}</div>
           </div>
-          <button class="btn-start">
-            开始练习
-            <i class="ri-arrow-right-line"></i>
-          </button>
+          
+          <h3>{{ question.question }}</h3>
+          
+          <div class="card-footer">
+            <button class="btn-start">
+              开始练习
+              <i class="ri-arrow-right-line"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -242,62 +245,63 @@ const downloadApp = () => {
 .practice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
 }
 
 .practice-card {
-  position: relative;
   background-color: white;
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
     box-shadow: var(--shadow-md);
 
     .btn-start {
       background-color: var(--primary-dark);
+
+      i {
+        transform: translateX(4px);
+      }
     }
   }
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.level-badge,
+.type-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .level-badge {
-  position: absolute;
-  top: var(--spacing-sm);
-  left: var(--spacing-sm);
   background-color: var(--primary-color);
   color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
 }
 
-.question-content {
-  flex: 1;
-  padding-top: var(--spacing-md);
-}
-
-.question-id {
-  color: var(--primary-color);
-  font-weight: 500;
-  margin-bottom: var(--spacing-xs);
+.type-badge {
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 h3 {
-  font-size: 1.1rem;
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.4;
 }
 
-.question-type {
-  color: var(--text-light);
-  font-size: 0.9rem;
+.card-footer {
+  margin-top: auto;
 }
 
 .btn-start {
@@ -309,20 +313,20 @@ h3 {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 8px;
+  padding: 10px;
   border-radius: 4px;
-  font-size: 0.9rem;
   font-weight: 500;
-  transition: background-color var(--transition-fast);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 
   i {
-    font-size: 1rem;
+    transition: transform var(--transition-fast);
   }
 }
 
 .purchase-dialog,
 .download-dialog {
-  :deep(.el-dialog__header) {
+  :deep(.el-dialog__header)  {
     margin-right: 0;
     text-align: center;
   }
