@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../../stores/auth'
@@ -191,11 +191,13 @@ const handleLogin = async () => {
     
     // Store login state if remember is checked
     if (loginForm.value.remember) {
-      localStorage.setItem('loginState', JSON.stringify({
-        token: data.data.token,
-        userInfo: data.data,
-        phoneNumber: phoneNumber
+      localStorage.setItem('rememberedLogin', JSON.stringify({
+        phone: loginForm.value.phone,
+        password: loginForm.value.password,
+        areaCode: areaCode.value
       }))
+    } else {
+      localStorage.removeItem('rememberedLogin')
     }
 
     // Show success message for 1 second
@@ -206,7 +208,7 @@ const handleLogin = async () => {
     })
     
     // Redirect to home page after successful login
-    router.push('/')
+    router.push(route.query.redirect?.toString() || '/')
     
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
@@ -214,6 +216,18 @@ const handleLogin = async () => {
     isSubmitting.value = false
   }
 }
+
+onMounted(() => {
+  // Check for remembered login
+  const remembered = localStorage.getItem('rememberedLogin')
+  if (remembered) {
+    const { phone, password, areaCode: savedAreaCode } = JSON.parse(remembered)
+    loginForm.value.phone = phone
+    loginForm.value.password = password
+    loginForm.value.remember = true
+    areaCode.value = savedAreaCode
+  }
+})
 </script>
 
 <style lang="scss" scoped>
